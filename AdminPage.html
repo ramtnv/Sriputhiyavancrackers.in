@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin File Replacement</title>
+  <style>
+    :root {
+      --bg-1: #020817;
+      --bg-2: #0b1120;
+      --bg-3: #111827;
+      --panel: rgba(15, 23, 42, 0.8);
+      --panel-strong: rgba(15, 23, 42, 0.96);
+      --panel-alt: rgba(30, 41, 59, 0.78);
+      --primary: #7c3aed;
+      --primary-2: #38bdf8;
+      --primary-3: #22d3ee;
+      --success: #22c55e;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --text: #e5eefb;
+      --muted: #9db1c9;
+      --line: rgba(148, 163, 184, 0.18);
+      --shadow: 0 22px 60px rgba(15, 23, 42, 0.55);
+      --ring: rgba(124, 58, 237, 0.55);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(124,58,237,0.28), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(56,189,248,0.18), transparent 30%),
+        linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 35%, var(--bg-3) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.6;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      background: rgba(124, 58, 237, 0.3);
+      top: -120px;
+      left: -80px;
+      animation: float 12s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      background: rgba(34, 211, 238, 0.2);
+      bottom: -100px;
+      right: -60px;
+      animation: float 15s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, 25px) scale(1.08); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, 100%);
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 28px 30px 22px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.35));
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #f7fbff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow: 0 16px 22px rgba(124, 58, 237, 0.35);
+    }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      color: var(--primary-3);
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.7rem, 2vw, 2.7rem);
+      letter-spacing: -0.04em;
+      line-height: 1.08;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar button {
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      transition: 0.2s ease;
+      cursor: pointer;
+    }
+
+    .ghost {
+      background: rgba(15, 23, 42, 0.45);
+      color: var(--text);
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--primary-2), var(--primary-3));
+      color: #041a2b;
+      border: none;
+      box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25);
+    }
+
+    .toolbar button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 18px;
+      padding: 22px 30px 0;
+    }
+
+    .stat {
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(15, 23, 42, 0.65));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 1px rgba(255,255,255,0.02);
+    }
+
+    .stat::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-2), transparent);
+    }
+
+    .label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .number {
+      display: block;
+      font-weight: 800;
+      font-size: clamp(1.8rem, 2vw, 2.4rem);
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+    }
+
+    .delta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .files-panel {
+      padding: 22px 30px 30px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+      padding: 8px 4px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: clamp(1.15rem, 1.7vw, 1.6rem);
+    }
+
+    .panel-header span {
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      background: rgba(34, 211, 238, 0.08);
+      color: var(--primary-3);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .files {
+      display: grid;
+      gap: 16px;
+    }
+
+    .file-card {
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.95), rgba(15, 23, 42, 0.72));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      display: grid;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .file-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(124, 58, 237, 0.35);
+      box-shadow: 0 16px 33px rgba(15, 23, 42, 0.35);
+    }
+
+    .file-card::after {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(124,58,237,0.7), rgba(56,189,248,0.5), transparent);
+      opacity: 0.8;
+    }
+
+    .file-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .file-main {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .file-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      color: white;
+      background: linear-gradient(135deg, rgba(124,58,237,0.92), rgba(56,189,248,0.8));
+      box-shadow: 0 10px 18px rgba(124, 58, 237, 0.22);
+    }
+
+    .file-name {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      border: 1px solid rgba(56, 189, 248, 0.24);
+      background: rgba(56, 189, 248, 0.08);
+      color: var(--primary-3);
+    }
+
+    .upload-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    input[type="file"] {
+      flex: 1 1 260px;
+      min-width: 220px;
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input[type="file"]:focus {
+      border-color: rgba(124, 58, 237, 0.6);
+      box-shadow: 0 0 0 4px rgba(124,58,237,0.15);
+    }
+
+    input[type="file"]::file-selector-button {
+      margin-right: 12px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.9), rgba(56,189,248,0.85));
+      color: white;
+      font-weight: 700;
+      padding: 9px 12px;
+      cursor: pointer;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #eef8ff;
+      font-weight: 800;
+      padding: 12px 18px;
+      cursor: pointer;
+      transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+      box-shadow: 0 10px 20px rgba(124, 58, 237, 0.23);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.04);
+    }
+
+    .status {
+      min-height: 22px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      padding-left: 2px;
+    }
+
+    .status.success { color: var(--success); }
+    .status.error { color: var(--danger); }
+
+    .custom-popup {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: min(420px, calc(100vw - 30px));
+      padding: 18px 18px 16px;
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 24px 40px rgba(2, 8, 23, 0.4);
+      transform: translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.22s ease;
+      z-index: 40;
+    }
+
+    .custom-popup.show {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .custom-popup.success {
+      border-color: rgba(34, 197, 94, 0.45);
+      box-shadow: 0 24px 40px rgba(34, 197, 94, 0.12);
+    }
+
+    .custom-popup.error {
+      border-color: rgba(248, 113, 113, 0.45);
+      box-shadow: 0 24px 40px rgba(248, 113, 113, 0.12);
+    }
+
+    .popup-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .popup-title {
+      margin: 0;
+      font-size: 1.02rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .popup-close {
+      border: none;
+      background: rgba(148, 163, 184, 0.08);
+      color: var(--text);
+      border-radius: 10px;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .popup-message {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.92rem;
+    }
+
+    .popup-progress {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.12);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .popup-progress span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--primary-2), var(--primary));
+      transition: width 0.2s ease;
+    }
+
+    @media (max-width: 760px) {
+      body { padding: 18px; }
+      .topbar, .stats, .files-panel { padding-left: 16px; padding-right: 16px; }
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .toolbar {
+        width: 100%;
+      }
+      .toolbar button { flex: 1; }
+      .stats { grid-template-columns: 1fr; }
+      .upload-form { flex-direction: column; align-items: stretch; }
+      button { width: 100%; }
+      .file-row { align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="custom-popup" id="uploadPopup" role="alert">
+    <div class="popup-header">
+      <h3 class="popup-title" id="popupTitle">Upload status</h3>
+      <button class="popup-close" id="closePopup" type="button" aria-label="Close popup">×</button>
+    </div>
+    <p class="popup-message" id="popupMessage">Waiting for file selection.</p>
+    <div class="popup-progress"><span id="popupProgressBar"></span></div>
+  </div>
+
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">A</div>
+        <div>
+          <p class="eyebrow">Control center</p>
+          <h1>Root File Replacement Admin</h1>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button type="button" class="ghost">Live Sync</button>
+        <button type="button" class="primary">Publish Updates</button>
+      </div>
+    </header>
+
+    <section class="stats" aria-label="Summary overview">
+      <article class="stat">
+        <span class="label">Files managed</span>
+        <span class="number">08</span>
+        <span class="delta">+2 this week</span>
+      </article>
+      <article class="stat">
+        <span class="label">Uploads ready</span>
+        <span class="number">100%</span>
+        <span class="delta">Secure queue</span>
+      </article>
+      <article class="stat">
+        <span class="label">System health</span>
+        <span class="number">Stable</span>
+        <span class="delta">Low risk</span>
+      </article>
+    </section>
+
+    <section class="files-panel">
+      <div class="panel-header">
+        <h2>Root Asset Registry</h2>
+        <span>Secure upload</span>
+      </div>
+
+      <div class="files">
+        <div class="file-card">
+          <div class="file-row">
+            <div class="file-main">
+              <div class="file-icon">XLS</div>
+              <div class="file-name">products.xlsx</div>
+            </div>
+            <span class="file-tag">Spreadsheet</span>
+          </div>
+          <form class="upload-form" data-target="products.xlsx" enctype="multipart/form-data">
+            <input type="file" name="replacement" accept=".xlsx,.xls" required />
+            <button type="submit">Replace File</button>
+          </form>
+          <div class="status"></div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-row">
+            <div class="file-main">
+              <div class="file-icon">IMG</div>
+              <div class="file-name">Card1.jpg</div>
+            </div>
+            <span class="file-tag">Image</span>
+          </div>
+          <form class="upload-form" data-target="Card1.jpg" enctype="multipart/form-data">
+            <input type="file" name="replacement" accept="image/*" required />
+            <button type="submit">Replace File</button>
+          </form>
+          <div class="status"></div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-row">
+            <div class="file-main">
+              <div class="file-icon">IMG</div>
+              <div class="file-name">Card2.jpg</div>
+            </div>
+            <span class="file-tag">Image</span>
+          </div>
+          <form class="upload-form" data-target="Card2.jpg" enctype="multipart/form-data">
+            <input type="file" name="replacement" accept="image/*" required />
+            <button type="submit">Replace File</button>
+          </form>
+          <div class="status"></div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-row">
+            <div class="file-main">
+              <div class="file-icon">PDF</div>
+              <div class="file-name">catalog.pdf</div>
+            </div>
+            <span class="file-tag">PDF</span>
+          </div>
+          <form class="upload-form" data-target="catalog.pdf" enctype="multipart/form-data">
+            <input type="file" name="replacement" accept="application/pdf" required />
+            <button type="submit">Replace File</button>
+          </form>
+          <div class="status"></div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-row">
+            <div class="file-main">
+              <div class="file-icon">PDF</div>
+              <div class="file-name">PriceList.pdf</div>
+            </div>
+            <span class="file-tag">PDF</span>
+          </div>
+          <form class="upload-form" data-target="PriceList.pdf" enctype="multipart/form-data">
+            <input type="file" name="replacement" accept="application/pdf" required />
+            <button type="submit">Replace File</button>
+          </form>
+          <div class="status"></div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-row">
+            <div class="file-main">
+              <div class="file-icon">HTML</div>
+              <div class="file-name">index.html</div>
+            </div>
+            <span class="file-tag">Page</span>
+          </div>
+          <form class="upload-form" data-target="index.html" enctype="multipart/form-data">
+            <input type="file" name="replacement" accept=".html,.htm" required />
+            <button type="submit">Replace File</button>
+          </form>
+          <div class="status"></div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-row">
+            <div class="file-main">
+              <div class="file-icon">PNG</div>
+              <div class="file-name">Logo.png</div>
+            </div>
+            <span class="file-tag">Image</span>
+          </div>
+          <form class="upload-form" data-target="Logo.png" enctype="multipart/form-data">
+            <input type="file" name="replacement" accept="image/png" required />
+            <button type="submit">Replace File</button>
+          </form>
+          <div class="status"></div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-row">
+            <div class="file-main">
+              <div class="file-icon">ADM</div>
+              <div class="file-name">AdminMano.html</div>
+            </div>
+            <span class="file-tag">Admin Page</span>
+          </div>
+          <form class="upload-form" data-target="AdminMano.html" enctype="multipart/form-data">
+            <input type="file" name="replacement" accept=".html,.htm" required />
+            <button type="submit">Replace File</button>
+          </form>
+          <div class="status"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const allowedTypes = {
+      'products.xlsx': { ext: ['.xlsx', '.xls'], mime: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'] },
+      'Card1.jpg': { ext: ['.jpg', '.jpeg', '.png'], mime: ['image/jpeg', 'image/png'] },
+      'Card2.jpg': { ext: ['.jpg', '.jpeg', '.png'], mime: ['image/jpeg', 'image/png'] },
+      'catalog.pdf': { ext: ['.pdf'], mime: ['application/pdf'] },
+      'PriceList.pdf': { ext: ['.pdf'], mime: ['application/pdf'] },
+      'index.html': { ext: ['.html', '.htm'], mime: ['text/html'] },
+      'Logo.png': { ext: ['.png'], mime: ['image/png'] },
+      'AdminMano.html': { ext: ['.html', '.htm'], mime: ['text/html'] }
+    };
+
+    const popup = document.getElementById('uploadPopup');
+    const popupTitle = document.getElementById('popupTitle');
+    const popupMessage = document.getElementById('popupMessage');
+    const popupProgress = document.getElementById('popupProgressBar');
+    const popupClose = document.getElementById('closePopup');
+
+    function showPopup(type, title, message, percent = 0) {
+      popup.classList.remove('success', 'error');
+      popup.classList.add(type, 'show');
+      popupTitle.textContent = title;
+      popupMessage.textContent = message;
+      popupProgress.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+    }
+
+    function hidePopup() {
+      popup.classList.remove('show');
+    }
+
+    popupClose.addEventListener('click', hidePopup);
+
+    function validateFileType(file, targetFile) {
+      const rule = allowedTypes[targetFile];
+      if (!rule) {
+        return { ok: true };
+      }
+
+      const uploadedExt = `.${(file.name.split('.').pop() || '').toLowerCase()}`;
+      const mime = (file.type || '').toLowerCase();
+      const extOK = rule.ext.includes(uploadedExt);
+      const mimeOK = !rule.mime.length || rule.mime.includes(mime);
+
+      if (!extOK && !mimeOK) {
+        return {
+          ok: false,
+          message: `Invalid file type for ${targetFile}. Allowed: ${rule.ext.join(', ')}`
+        };
+      }
+
+      return { ok: true };
+    }
+
+    document.querySelectorAll('.upload-form').forEach((form) => {
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const fileInput = form.querySelector('input[type="file"]');
+        const statusBox = form.parentElement.querySelector('.status');
+        const targetFile = form.dataset.target;
+
+        if (!fileInput.files || !fileInput.files[0]) {
+          statusBox.textContent = 'Please choose a file first.';
+          statusBox.className = 'status error';
+          showPopup('error', 'Missing file', 'Please select a file before uploading.', 100);
+          return;
+        }
+
+        const file = fileInput.files[0];
+        const validation = validateFileType(file, targetFile);
+
+        if (!validation.ok) {
+          statusBox.textContent = validation.message;
+          statusBox.className = 'status error';
+          showPopup('error', 'Invalid file type', validation.message, 100);
+          return;
+        }
+
+        statusBox.textContent = 'Uploading...';
+        statusBox.className = 'status';
+        showPopup('success', `Uploading ${targetFile}`, 'Uploading in progress. Please wait...', 5);
+
+        const formData = new FormData();
+        formData.append('replacement', file);
+        formData.append('target', targetFile);
+
+        const xhr = new XMLHttpRequest();
+        const uploadUrl = '/upload';
+
+        xhr.open('POST', uploadUrl, true);
+
+        xhr.upload.addEventListener('progress', (event) => {
+          if (!event.lengthComputable) return;
+          const percent = Math.round((event.loaded / event.total) * 100);
+          popupProgress.style.width = `${percent}%`;
+          popupMessage.textContent = `Uploading ${targetFile}... ${percent}%`;
+        });
+
+        xhr.onload = () => {
+          let payload = {};
+          try {
+            payload = JSON.parse(xhr.responseText);
+          } catch (error) {
+            payload = { success: false, message: xhr.responseText || 'Unexpected server response.' };
+          }
+
+          if (xhr.status >= 200 && xhr.status < 300 && payload.success !== false) {
+            statusBox.textContent = `Updated ${targetFile} successfully.`;
+            statusBox.className = 'status success';
+            showPopup('success', 'Upload complete', `${targetFile} was saved in the root directory using the correct filename.`, 100);
+            setTimeout(hidePopup, 3500);
+          } else {
+            const serverMessage = payload.message || `Server error: ${xhr.status}`;
+            statusBox.textContent = `Upload failed for ${targetFile}. ${serverMessage}`;
+            statusBox.className = 'status error';
+            showPopup('error', 'Upload failed', serverMessage, 100);
+          }
+        };
+
+        xhr.onerror = () => {
+          statusBox.textContent = `Could not replace ${targetFile}. Please check the server and try again.`;
+          statusBox.className = 'status error';
+          showPopup('error', 'Connection error', 'The upload could not finish. Please make sure the backend is running.', 100);
+        };
+
+        xhr.send(formData);
+      });
+    });
+  </script>
+</body>
+</html>

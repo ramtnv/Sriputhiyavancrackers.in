@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sri Puthiyavan Firecrackers</title>
+  <link rel="icon" href="Logo.png" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-1: #020817;
+      --bg-2: #0b1120;
+      --bg-3: #111827;
+      --panel: rgba(15, 23, 42, 0.78);
+      --panel-strong: rgba(15, 23, 42, 0.96);
+      --panel-alt: rgba(30, 41, 59, 0.78);
+      --primary: #7c3aed;
+      --primary-2: #38bdf8;
+      --primary-3: #22d3ee;
+      --success: #22c55e;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --text: #e5eefb;
+      --muted: #9db1c9;
+      --line: rgba(148, 163, 184, 0.18);
+      --shadow: 0 22px 60px rgba(15, 23, 42, 0.55);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(124, 58, 237, 0.28), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.18), transparent 30%),
+        linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 35%, var(--bg-3) 100%);
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.6;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      background: rgba(124, 58, 237, 0.3);
+      top: -120px;
+      left: -80px;
+      animation: float 12s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      background: rgba(34, 211, 238, 0.18);
+      bottom: -100px;
+      right: -60px;
+      animation: float 15s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, 25px) scale(1.08); }
+    }
+
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 28px auto 40px;
+      padding: 0 18px;
+    }
+
+    header {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 18px 22px;
+      position: sticky;
+      top: 18px;
+      z-index: 1000;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo-container img {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      box-shadow: 0 16px 22px rgba(124, 58, 237, 0.35);
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      padding: 4px;
+    }
+
+    .company-name {
+      font-size: 2.05rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 999px;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    nav a:hover {
+      background: rgba(124, 58, 237, 0.12);
+      color: #dbebff;
+      transform: translateY(-1px);
+    }
+
+    main {
+      display: grid;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    section {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 28px 24px;
+      position: relative;
+      scroll-margin-top: 100px;
+      text-align: left;
+    }
+
+    h1, h2 {
+      margin: 0 0 18px;
+      color: var(--text);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.08;
+      animation: fadeInUp 1s ease both;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 3vw, 3.1rem);
+      color: #f7fbff;
+    }
+
+    h2 {
+      font-size: clamp(1.55rem, 2vw, 2.3rem);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    p {
+      margin: 0 0 18px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 900px;
+      animation: fadeIn 2s ease both;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 22px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #eef8ff;
+      text-decoration: none;
+      border: none;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+      box-shadow: 0 10px 20px rgba(124, 58, 237, 0.23);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.04);
+    }
+
+    .btn-order {
+      background-color: #b91c1c;
+      background-image:
+        radial-gradient(circle, rgba(255, 255, 255, 0.95) 1px, transparent 1.8px),
+        radial-gradient(circle, rgba(255, 220, 120, 0.9) 1px, transparent 2px),
+        linear-gradient(135deg, #dc2626, #991b1b);
+      background-size: 31px 29px, 43px 37px, 100% 100%;
+      background-position: 0 0, 12px 8px, 0 0;
+      box-shadow: 0 10px 20px rgba(220, 38, 38, 0.32);
+      animation: order-glitter 1.8s steps(4, end) infinite;
+    }
+
+    @keyframes order-glitter {
+      to { background-position: 31px 29px, -31px 45px, 0 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn-order {
+        animation: none;
+      }
+    }
+
+    .cards-container {
+      display: flex;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .card {
+      width: min(100%, 300px);
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      padding: 0;
+      text-align: left;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      appearance: none;
+    }
+
+    .card img {
+      width: 100%;
+      display: block;
+      border-radius: 18px 18px 0 0;
+    }
+
+    .card:hover,
+    .card:focus-visible {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 28px rgba(124, 58, 237, 0.15);
+      outline: none;
+    }
+
+    .frame-viewer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2, 8, 23, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .frame-viewer iframe {
+      width: min(90vw, 1100px);
+      height: min(90vh, 800px);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }
+
+    .frame-close {
+      position: absolute;
+      top: 22px;
+      right: 28px;
+      font-size: 2.2rem;
+      color: white;
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .frame-close:hover,
+    .frame-close:focus-visible {
+      background: rgba(124, 58, 237, 0.18);
+      outline: none;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 20px 40px;
+      color: #8ea3c1;
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    #fireworks {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(ellipse at bottom, #0d0d0d, #000);
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .page-shell {
+        margin-top: 18px;
+        padding: 0 12px;
+      }
+
+      header {
+        padding: 16px 16px;
+      }
+
+      nav {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      section {
+        padding: 22px 18px;
+      }
+
+      .company-name {
+        font-size: 0.95rem;
+      }
+
+      .btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    /* Responsive visual refresh */
+    :root {
+      color-scheme: dark;
+      --bg-1: #080d18;
+      --bg-2: #0d1422;
+      --bg-3: #111c2e;
+      --panel: #111b2c;
+      --panel-strong: #152238;
+      --panel-alt: #1b2a40;
+      --primary: #d84935;
+      --primary-2: #e77742;
+      --primary-3: #f3b64a;
+      --success: #45c28a;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --text: #f4f2ed;
+      --muted: #b5c0cf;
+      --line: rgba(189, 201, 218, 0.15);
+      --shadow: 0 18px 46px rgba(0, 0, 0, 0.22);
+    }
+
+    html {
+      overflow-x: clip;
+      scroll-behavior: smooth;
+      scroll-padding-top: 110px;
+    }
+
+    body {
+      background:
+        radial-gradient(ellipse at 12% 0%, rgba(216, 73, 53, 0.1), transparent 32rem),
+        linear-gradient(145deg, var(--bg-1), var(--bg-2) 48%, var(--bg-3));
+      overflow-x: clip;
+    }
+
+    body::before,
+    body::after {
+      width: 300px;
+      height: 300px;
+      filter: blur(100px);
+      opacity: 0.22;
+      animation: none;
+    }
+
+    body::before {
+      background: rgba(216, 73, 53, 0.27);
+    }
+
+    body::after {
+      background: rgba(243, 182, 74, 0.13);
+    }
+
+    .page-shell {
+      width: min(100% - 48px, 1320px);
+      max-width: 1320px;
+      margin: 24px auto 0;
+      padding: 0;
+    }
+
+    header {
+      gap: 18px 28px;
+      padding: 16px 24px;
+      border-radius: 20px;
+      background: rgba(15, 24, 39, 0.92);
+      box-shadow: 0 10px 34px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .logo-container {
+      min-width: 0;
+      gap: 14px;
+    }
+
+    .logo-container img {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 auto;
+      border-radius: 14px;
+      box-shadow: 0 7px 18px rgba(216, 73, 53, 0.22);
+      background: #fff;
+      padding: 3px;
+    }
+
+    .company-name {
+      font-size: clamp(1.08rem, 1.5vw, 1.4rem);
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+      white-space: normal;
+    }
+
+    nav {
+      gap: 4px;
+    }
+
+    nav a {
+      padding: 9px 13px;
+      color: #d3dbe6;
+      font-size: 0.92rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    nav a:hover,
+    nav a:focus-visible {
+      color: #fff;
+      background: rgba(216, 73, 53, 0.16);
+      outline: none;
+    }
+
+    main {
+      gap: 20px;
+      margin-top: 22px;
+    }
+
+    section {
+      padding: clamp(24px, 3.2vw, 42px);
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(20, 31, 49, 0.97), rgba(16, 26, 42, 0.97));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      scroll-margin-top: 112px;
+    }
+
+    #home {
+      padding-top: clamp(30px, 4vw, 52px);
+      padding-bottom: clamp(30px, 4vw, 52px);
+      border-color: rgba(243, 182, 74, 0.22);
+      background:
+        radial-gradient(ellipse at top right, rgba(216, 73, 53, 0.11), transparent 42%),
+        linear-gradient(145deg, rgba(22, 34, 53, 0.98), rgba(16, 26, 42, 0.98));
+    }
+
+    h1,
+    h2 {
+      letter-spacing: -0.035em;
+      line-height: 1.18;
+      animation: none;
+    }
+
+    h1 {
+      max-width: 1000px;
+      margin-bottom: 22px;
+      font-size: clamp(2rem, 4vw, 3.45rem);
+      color: #fffaf2;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom-color: rgba(243, 182, 74, 0.26);
+      font-size: clamp(1.5rem, 2.5vw, 2.15rem);
+    }
+
+    p {
+      max-width: 1000px;
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: clamp(0.96rem, 1.15vw, 1.05rem);
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+      animation: none;
+    }
+
+    .btn-row {
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      min-height: 46px;
+      padding: 12px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 11px;
+      background: linear-gradient(135deg, #c94434, #df7040);
+      box-shadow: 0 7px 18px rgba(201, 68, 52, 0.18);
+      color: #fff;
+      font-size: 0.94rem;
+      font-weight: 700;
+      line-height: 1.35;
+      text-align: center;
+      transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.08);
+      box-shadow: 0 10px 22px rgba(201, 68, 52, 0.26);
+    }
+
+    .btn:focus-visible,
+    .card:focus-visible,
+    .frame-close:focus-visible {
+      outline: 3px solid var(--primary-3);
+      outline-offset: 3px;
+    }
+
+    .btn-order {
+      background-color: #b72f2a;
+      background-image: linear-gradient(135deg, #c5322d, #922722);
+      background-size: auto;
+      background-position: center;
+      box-shadow: 0 7px 18px rgba(190, 49, 44, 0.22);
+      animation: none;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 340px));
+      align-items: start;
+      gap: 18px;
+      margin-top: 26px;
+    }
+
+    .card {
+      width: 100%;
+      border-radius: 14px;
+      border-color: var(--line);
+      background: #0c1422;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card img {
+      width: 100%;
+      height: auto;
+      border-radius: 0;
+    }
+
+    .card:hover,
+    .card:focus-visible {
+      transform: translateY(-3px);
+      border-color: rgba(243, 182, 74, 0.42);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    .frame-viewer {
+      padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      background: rgba(3, 7, 13, 0.86);
+      backdrop-filter: blur(8px);
+    }
+
+    .frame-viewer iframe {
+      width: min(100%, 1100px);
+      height: min(86vh, 800px);
+      border-radius: 14px;
+    }
+
+    .frame-close {
+      top: max(14px, env(safe-area-inset-top));
+      right: max(14px, env(safe-area-inset-right));
+      z-index: 1;
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: #172338;
+      font-size: 2rem;
+    }
+
+    footer {
+      padding: 28px 20px max(34px, env(safe-area-inset-bottom));
+      color: #a5b1c1;
+      font-size: 0.9rem;
+    }
+
+    footer p {
+      margin: 0 auto;
+      font-size: inherit;
+    }
+
+    #fireworks {
+      z-index: -1;
+      opacity: 0.17;
+      background: transparent;
+    }
+
+    @media (min-width: 1600px) {
+      .page-shell {
+        width: min(100% - 72px, 1400px);
+        max-width: 1400px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .page-shell {
+        width: min(100% - 36px, 760px);
+        margin-top: 18px;
+      }
+
+      header {
+        position: sticky;
+        top: 10px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      nav {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      section {
+        scroll-margin-top: 160px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      html {
+        scroll-padding-top: 20px;
+      }
+
+      .page-shell {
+        width: calc(100% - 24px);
+        margin-top: 12px;
+      }
+
+      header {
+        gap: 12px;
+        padding: 14px;
+        border-radius: 16px;
+      }
+
+      .logo-container {
+        width: 100%;
+        gap: 11px;
+      }
+
+      .logo-container img {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+      }
+
+      .company-name {
+        font-size: clamp(1rem, 4.6vw, 1.2rem);
+      }
+
+      nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      nav a {
+        padding: 10px 8px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.025);
+        font-size: 0.88rem;
+        text-align: center;
+      }
+
+      main {
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      section {
+        padding: 22px 18px;
+        border-radius: 17px;
+        scroll-margin-top: 200px;
+      }
+
+      #home {
+        padding-top: 25px;
+        padding-bottom: 25px;
+      }
+
+      h1 {
+        font-size: clamp(1.8rem, 8vw, 2.35rem);
+      }
+
+      h2 {
+        font-size: clamp(1.4rem, 6vw, 1.8rem);
+      }
+
+      p {
+        font-size: 0.96rem;
+        line-height: 1.72;
+      }
+
+      .btn-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .btn {
+        display: flex;
+        width: 100%;
+        min-height: 48px;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 14px;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      .cards-container {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+        margin-top: 20px;
+      }
+
+      .card {
+        max-width: 100%;
+      }
+
+      .frame-viewer iframe {
+        height: 78vh;
+      }
+
+      footer {
+        padding: 24px 12px max(28px, env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (max-width: 360px) {
+      .page-shell {
+        width: calc(100% - 20px);
+      }
+
+      header {
+        padding: 12px;
+      }
+
+      section {
+        padding: 19px 15px;
+      }
+
+      nav a {
+        font-size: 0.84rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="fireworks"></canvas>
+
+<div class="page-shell">
+  <header>
+    <div class="logo-container">
+      <img src="Logo.png" alt="Sri Puthiyavan Logo" />
+      <span class="company-name">Sri Puthiyavan Fire Crackers</span>
+    </div>
+    <nav aria-label="Primary Navigation">
+      <a href="#home">Home</a>
+      <a href="#products">Products</a>
+      <a href="#about">About Us</a>
+      <a href="#contact">Contact Us</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="home">
+      <h1>Welcome to Sri Puthiyavan Firecrackers 🎆</h1>
+      <p>Light up your celebrations with unmatched joy, safety, and a dazzling display of sparkles. We offer premium-quality firecrackers that bring excitement to every occasion—Diwali, weddings, parties, or festivals. Each product is crafted to ensure maximum brilliance while prioritizing safety for you and your loved ones. With our unbeatable prices and wide selection, you don't have to compromise on quality or fun. Make every moment memorable with colorful explosions that light up the night sky. Choose us for reliable, festive firecrackers that guarantee smiles, laughter, and lasting memories. Celebrate with confidence, style, and the sparkle you deserve.</p>
+      <p>போற்ற முடியாத மகிழ்ச்சி, பாதுகாப்பு மற்றும் கண்மூடிய ஒளிக்கீற்றுகளுடன் உங்கள் கொண்டாட்டங்களை ஒளிரச் செய்யுங்கள்! தீபாவளி, கல்யாணம், நிகழ்ச்சிகள், விழாக்கள் என எல்லா தருணங்களுக்கும் உற்சாகம் சேர்க்கும் உயர் தர பட்டாசுகளை நாங்கள் வழங்குகிறோம். ஒவ்வொரு தயாரிப்பும் அதிக விளக்கத்துடன் உங்கள் குடும்பத்தினரின் பாதுகாப்பை முன்னிறுத்தி தயாரிக்கப்படுகிறது. எங்களது போட்டியற்ற விலைகளும், பரந்த தேர்வும், தரத்திலோ மகிழ்ச்சியிலோ சலுகை இல்லாமல் உற்சாகம் கொடுக்கும். வண்ணமயமான வெடிப்புகளால் ஒவ்வொரு தருணத்தையும் மறக்க முடியாத நினைவுகளாக மாற்றுங்கள். நம்பகமான, பண்டிகைத் தகுதியான பட்டாசுகளுக்காக எங்களை தேர்ந்தெடுங்கள் - இது நிச்சயமாக சிரிப்பையும், சந்தோஷத்தையும், நீண்டநாள் நினைவுகளையும் உறுதி செய்யும். நம்பிக்கையுடன், ஸ்டைலோடு, நீங்கள் உரிய ஒளிக்கீற்றுடன் கொண்டாடுங்கள்!</p>
+      <div class="btn-row">
+        <a href="#products" class="btn">Explore Products</a>
+      </div>
+    </section>
+
+    <section id="products">
+      <h2>Our Product Catalog</h2>
+      <p>Browse our collection of vibrant and safe fireworks.</p>
+      <div class="btn-row">
+        <a href="catalog.pdf" class="btn" target="_blank" rel="noopener noreferrer">Download Catalog</a>
+        <a href="PriceList.pdf" class="btn" target="_blank" rel="noopener noreferrer">Pricelist</a>
+        <a href="Order.html" class="btn btn-order" target="_blank" rel="noopener noreferrer">Order Now</a>
+      </div>
+    </section>
+
+    <section id="about">
+      <h2>Who We Are</h2>
+      <p>🎇 Sri Puthiyavan is a trusted firecracker shop dedicated to delivering quality, tradition, and complete customer satisfaction. With years of experience in the industry, we have been lighting up festivals and special occasions with our safe, vibrant, and high-performance fireworks. Our wide range of products includes everything from classic favorites to the latest innovations, all designed to add sparkle and excitement to your celebrations. We take pride in offering reliable service, affordable prices, and a commitment to safety. At Sri Puthiyavan, we believe in preserving festive traditions while creating joyful, unforgettable moments for you and your loved ones every year.</p>
+      <p>🎇 ஸ்ரீ புதியவன் என்பது தரம், பாரம்பரியம் மற்றும் வாடிக்கையாளர் திருப்திக்கு முழுமையாக அர்ப்பணிக்கப்பட்ட நம்பிக்கைக்குரிய பட்டாசு கடையாகும். பல ஆண்டுகளாக, பாதுகாப்பான மற்றும் உயிருடன் கலங்கும் பட்டாசுகளால் திருநாள்கள் மற்றும் சிறப்பான நிகழ்வுகளை ஒளிரச் செய்துள்ளோம். பாரம்பரிய வாசனையுடன் கூடிய எங்கள் பரந்த தயாரிப்பு வரிசை, பழமையான பிரியங்கரங்களிலிருந்து புதுமையான தயாரிப்புகள் வரை உள்ளது. எங்கள் சேவையின் நம்பகத்தன்மை, நேர்மையான விலை மற்றும் பாதுகாப்பு குறித்த பற்றுதல் ஆகியவை எங்களை தனித்துவமாக்குகின்றன. ஒவ்வொரு ஆண்டும் உங்களது உறவுகள் மற்றும் நண்பர்களுடன் மகிழ்ச்சியான, மறக்கமுடியாத தருணங்களை உருவாக்குவதில் நாங்கள் பெருமை கொள்கிறோம்.</p>
+    </section>
+
+    <section id="contact">
+      <h2>Contact Us</h2>
+      <div class="btn-row">
+        <a href="https://www.instagram.com/Sri_puthiyavan/" class="btn" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://wa.me/919003357888" class="btn" target="_blank" rel="noopener noreferrer">Order via WhatsApp</a>
+        <a href="https://wa.me/919677539254" class="btn" target="_blank" rel="noopener noreferrer">Enquiry via WhatsApp</a>
+        <a href="https://maps.app.goo.gl/AurZ31wLcZoWyDFb8?g_st=iw" class="btn" target="_blank" rel="noopener noreferrer">Google Maps</a>
+      </div>
+
+      <div class="cards-container">
+        <button type="button" class="card" onclick="openFrame('Card1.jpg')" aria-label="Open card 1 preview">
+          <img src="Card1.jpg" alt="Card 1" loading="lazy">
+        </button>
+        <button type="button" class="card" onclick="openFrame('Card2.jpg')" aria-label="Open card 2 preview">
+          <img src="Card2.jpg" alt="Card 2" loading="lazy">
+        </button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Frame Viewer -->
+<div class="frame-viewer" id="frameViewer">
+  <button type="button" class="frame-close" onclick="closeFrame()" aria-label="Close frame">&times;</button>
+  <iframe id="frameContent" title="Frame viewer content"></iframe>
+</div>
+
+<footer>
+  <p>&copy; 2026-2027 Sri Puthiyavan Fire Crackers. All rights reserved.</p>
+</footer>
+
+<script>
+  // Fireworks animation (guarded for environments without canvas support)
+  (function() {
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
+    if (!canvas || !ctx) {
+      console.warn('Canvas not available — skipping fireworks animation.');
+      return;
+    }
+
+    let w = 0, h = 0;
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const particles = [];
+
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function createFirework(x, y) {
+      const colors = ['#ff3131', '#ff7b00', '#fff', '#ff0', '#0ff'];
+      for (let i = 0; i < 80; i++) {
+        particles.push({
+          x, y,
+          dx: random(-5,5),
+          dy: random(-5,5),
+          life: 100,
+          color: colors[Math.floor(Math.random()*colors.length)]
+        });
+      }
+    }
+
+    function animate() {
+      ctx.fillStyle = "rgba(0,0,0,0.2)";
+      ctx.fillRect(0,0,w,h);
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, Math.PI*2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        p.dy += 0.05;
+        p.life--;
+        if (p.life <= 0) {
+          particles.splice(i,1);
+          i--;
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    setInterval(() => {
+      if (w > 200 && h > 100) {
+        createFirework(random(100, Math.max(150, w-100)), random(50, Math.max(80, h/2)));
+      }
+    }, 1500);
+  })();
+
+  // Frame Viewer
+  function openFrame(src) {
+    const fv = document.getElementById('frameViewer');
+    const fc = document.getElementById('frameContent');
+    if (fv && fc) {
+      fv.style.display = 'flex';
+      fc.src = src;
+    }
+  }
+
+  function closeFrame() {
+    const fv = document.getElementById('frameViewer');
+    const fc = document.getElementById('frameContent');
+    if (fv && fc) {
+      fv.style.display = 'none';
+      fc.src = '';
+    }
+  }
+</script>
+
+</body>
+</html>

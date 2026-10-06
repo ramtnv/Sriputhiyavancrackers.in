@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Order System</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    header {
+      background: #1f4e78;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #eef3f8;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bbb;
+      border-radius: 5px;
+    }
+
+    .quantity {
+      width: 80px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 5px;
+      padding: 10px 16px;
+      cursor: pointer;
+      color: white;
+      background: #1f4e78;
+    }
+
+    button:hover {
+      background: #163a5b;
+    }
+
+    .remove {
+      background: #c0392b;
+    }
+
+    .remove:hover {
+      background: #922b21;
+    }
+
+    .total {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: right;
+      margin-top: 20px;
+    }
+
+    .success {
+      display: none;
+      background: #dff0d8;
+      color: #27632a;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .success strong {
+      font-size: 22px;
+    }
+
+    @media (max-width: 800px) {
+      table {
+        font-size: 13px;
+      }
+
+      th:nth-child(3),
+      td:nth-child(3) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Product Order System</h1>
+</header>
+
+<div class="container">
+
+  <div id="successMessage" class="success"></div>
+
+  <div class="card">
+    <h2>Customer Details</h2>
+
+    <label>Address</label>
+    <br><br>
+    <input
+      type="text"
+      id="address"
+      placeholder="Enter your full address"
+    >
+
+    <br><br>
+
+    <label>Phone Number</label>
+    <br><br>
+    <input
+      type="tel"
+      id="phone"
+      placeholder="Enter your phone number"
+    >
+  </div>
+
+  <div class="card">
+    <h2>Available Products</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Serial Number</th>
+          <th>Product Name</th>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Add</th>
+        </tr>
+      </thead>
+
+      <tbody id="productsTable">
+        <tr>
+          <td colspan="6">Loading products...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Selected Products</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Serial Number</th>
+          <th>Product Name</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Subtotal</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+
+      <tbody id="cartTable">
+        <tr>
+          <td colspan="6">No products selected.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="total">
+      Total: ₹<span id="total">0.00</span>
+    </div>
+
+    <br>
+
+    <button onclick="submitOrder()">
+      Submit Order
+    </button>
+  </div>
+
+</div>
+
+<script>
+  let products = [];
+  let cart = [];
+
+  async function loadProducts() {
+    try {
+      const response = await fetch("/api/products");
+      products = await response.json();
+
+      const table = document.getElementById("productsTable");
+      table.innerHTML = "";
+
+      products.forEach((product, index) => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td>${product.serialNumber}</td>
+          <td>${product.name}</td>
+          <td>${product.description}</td>
+          <td>₹${product.price.toFixed(2)}</td>
+          <td>
+            <input
+              class="quantity"
+              type="number"
+              id="qty-${index}"
+              value="1"
+              min="1"
+            >
+          </td>
+          <td>
+            <button onclick="addProduct(${index})">
+              Add
+            </button>
+          </td>
+        `;
+
+        table.appendChild(row);
+      });
+
+    } catch (error) {
+      document.getElementById("productsTable").innerHTML =
+        `<tr><td colspan="6">Unable to load products.</td></tr>`;
+    }
+  }
+
+  function addProduct(index) {
+    const product = products[index];
+    const quantity = Number(
+      document.getElementById(`qty-${index}`).value
+    );
+
+    if (quantity < 1) {
+      alert("Quantity must be at least 1.");
+      return;
+    }
+
+    const existing = cart.find(
+      item => item.serialNumber === product.serialNumber
+    );
+
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      cart.push({
+        serialNumber: product.serialNumber,
+        name: product.name,
+        price: product.price,
+        quantity
+      });
+    }
+
+    renderCart();
+  }
+
+  function removeProduct(serialNumber) {
+    cart = cart.filter(
+      item => item.serialNumber !== serialNumber
+    );
+
+    renderCart();
+  }
+
+  function renderCart() {
+    const table = document.getElementById("cartTable");
+    table.innerHTML = "";
+
+    if (cart.length === 0) {
+      table.innerHTML =
+        `<tr><td colspan="6">No products selected.</td></tr>`;
+
+      document.getElementById("total").textContent = "0.00";
+      return;
+    }
+
+    let total = 0;
+
+    cart.forEach(item => {
+      const subtotal = item.price * item.quantity;
+      total += subtotal;
+
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${item.serialNumber}</td>
+        <td>${item.name}</td>
+        <td>₹${item.price.toFixed(2)}</td>
+        <td>
+          <input
+            class="quantity"
+            type="number"
+            min="1"
+            value="${item.quantity}"
+            onchange="updateQuantity('${item.serialNumber}', this.value)"
+          >
+        </td>
+        <td>₹${subtotal.toFixed(2)}</td>
+        <td>
+          <button
+            class="remove"
+            onclick="removeProduct('${item.serialNumber}')"
+          >
+            Remove
+          </button>
+        </td>
+      `;
+
+      table.appendChild(row);
+    });
+
+    document.getElementById("total").textContent =
+      total.toFixed(2);
+  }
+
+  function updateQuantity(serialNumber, quantity) {
+    quantity = Number(quantity);
+
+    if (quantity < 1) quantity = 1;
+
+    const item = cart.find(
+      item => item.serialNumber === serialNumber
+    );
+
+    if (item) {
+      item.quantity = quantity;
+    }
+
+    renderCart();
+  }
+
+  async function submitOrder() {
+    const address = document.getElementById("address").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+
+    if (!address) {
+      alert("Please enter your address.");
+      return;
+    }
+
+    if (!phone) {
+      alert("Please enter your phone number.");
+      return;
+    }
+
+    if (cart.length === 0) {
+      alert("Please add at least one product.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          address,
+          phone,
+          products: cart.map(item => ({
+            serialNumber: item.serialNumber,
+            quantity: item.quantity
+          }))
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error);
+      }
+
+      const success = document.getElementById("successMessage");
+
+      success.style.display = "block";
+
+      success.innerHTML = `
+        <h3>Order Submitted Successfully</h3>
+        Your acknowledgement / unique ID is:
+        <br><br>
+        <strong>${result.uniqueId}</strong>
+        <br><br>
+        Please save this ID for future reference.
+      `;
+
+      cart = [];
+      renderCart();
+
+      document.getElementById("address").value = "";
+      document.getElementById("phone").value = "";
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    } catch (error) {
+      alert("Order submission failed: " + error.message);
+    }
+  }
+
+  loadProducts();
+</script>
+
+</body>
+</html>
