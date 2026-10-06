@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Product Catalog & Order System</title>
+<!-- SheetJS library for Excel read/write -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg-1: #020817;
+    --bg-2: #0b1120;
+    --bg-3: #111827;
+    --panel: rgba(15, 23, 42, 0.8);
+    --panel-strong: rgba(15, 23, 42, 0.96);
+    --panel-alt: rgba(30, 41, 59, 0.78);
+    --primary: #7c3aed;
+    --primary-2: #38bdf8;
+    --primary-3: #22d3ee;
+    --success: #22c55e;
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --text: #e5eefb;
+    --muted: #9db1c9;
+    --line: rgba(148, 163, 184, 0.18);
+    --shadow: 0 22px 60px rgba(15, 23, 42, 0.55);
+  }
+
+  * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 32px 20px;
+    color: var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(124,58,237,0.28), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(56,189,248,0.18), transparent 30%),
+      linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 35%, var(--bg-3) 100%);
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  body::before {
+    background: rgba(124, 58, 237, 0.3);
+    top: -120px; left: -80px;
+    animation: float 12s ease-in-out infinite alternate;
+  }
+
+  body::after {
+    background: rgba(34, 211, 238, 0.18);
+    bottom: -100px; right: -60px;
+    animation: float 15s ease-in-out infinite alternate-reverse;
+  }
+
+  @keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, 25px) scale(1.08); }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: auto;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid var(--line);
+    border-radius: 26px;
+    box-shadow: var(--shadow);
+    padding: 26px 28px 30px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding: 8px 4px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .brand-mark {
+    width: 52px; height: 52px; border-radius: 16px;
+    display: grid; place-items: center;
+    font-size: 1.5rem; font-weight: 800;
+    color: #f7fbff;
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    box-shadow: 0 16px 22px rgba(124, 58, 237, 0.35);
+  }
+
+  .eyebrow {
+    margin: 0 0 4px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    color: var(--primary-3);
+    font-weight: 700;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.7rem, 2vw, 2.7rem);
+    letter-spacing: -0.04em;
+    line-height: 1.08;
+    text-align: left;
+    color: var(--text);
+  }
+
+  h2 {
+    margin: 0 0 16px;
+    color: var(--text);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+
+  .toolbar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+
+  button {
+    cursor: pointer;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    color: #eef8ff;
+    font-weight: 800;
+    transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+    box-shadow: 0 10px 20px rgba(124, 58, 237, 0.23);
+  }
+
+  button:hover { transform: translateY(-2px); filter: brightness(1.04); }
+
+  button.remove { background: linear-gradient(135deg, #f87171, #ef4444); box-shadow: 0 10px 20px rgba(239, 68, 68, 0.18); }
+  button.checkout {
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    padding: 14px 24px; font-size: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: inset 0 1px rgba(255,255,255,0.02);
+    margin-bottom: 26px;
+  }
+
+  th, td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    color: var(--text);
+  }
+
+  th {
+    background: rgba(17, 24, 39, 0.9);
+    color: var(--text);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  tbody tr:nth-child(even) {
+    background: rgba(15, 23, 42, 0.4);
+  }
+
+  tbody tr:hover {
+    background: rgba(124, 58, 237, 0.07);
+  }
+
+  input[type="number"],
+  input[type="text"],
+  input[type="tel"],
+  textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.8);
+    color: var(--text);
+    outline: none;
+  }
+
+  input[type="number"] { width: 72px; min-width: 72px; }
+
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  textarea:focus,
+  input[type="number"]:focus {
+    border-color: rgba(124, 58, 237, 0.6);
+    box-shadow: 0 0 0 4px rgba(124,58,237,0.15);
+  }
+
+  .cart-summary,
+  .user-form,
+  .confirmation {
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(15, 23, 42, 0.7));
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 20px 18px 18px;
+    margin-bottom: 24px;
+    box-shadow: inset 0 1px rgba(255,255,255,0.02);
+  }
+
+  .total {
+    margin-top: 14px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #fbbf24;
+  }
+
+  .user-form label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+
+  .confirmation {
+    display: none;
+    background: rgba(20, 83, 45, 0.3);
+    border-color: rgba(34, 197, 94, 0.35);
+    color: var(--text);
+  }
+
+  .confirmation h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #9ae6b4;
+  }
+
+  .uid-display {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #c4f1d8;
+    background: rgba(15, 23, 42, 0.9);
+    padding: 10px 12px;
+    border-radius: 10px;
+    display: inline-block;
+    letter-spacing: 2px;
+    border: 1px solid rgba(34, 197, 94, 0.28);
+  }
+
+  .status {
+    padding: 12px 14px;
+    margin: 10px 0 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    border: 1px solid transparent;
+  }
+
+  .status.error {
+    background: rgba(127, 29, 29, 0.32);
+    color: #fecaca;
+    border-color: rgba(248, 113, 113, 0.3);
+  }
+
+  .status.info {
+    background: rgba(30, 64, 175, 0.22);
+    color: #dbeafe;
+    border-color: rgba(147, 197, 253, 0.28);
+  }
+
+  .message-overlay {
+    position: fixed; inset: 0; background: rgba(2, 8, 23, 0.72);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+  }
+
+  .message-box {
+    background: rgba(15, 23, 42, 0.97);
+    width: min(500px, 100%);
+    border-radius: 18px;
+    box-shadow: 0 24px 40px rgba(2, 8, 23, 0.4);
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+
+  .message-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    color: #fff;
+    padding: 18px 20px; font-size: 1.3rem; font-weight: 800;
+  }
+
+  .message-body {
+    padding: 22px 20px 18px; color: var(--text); line-height: 1.6;
+  }
+
+  .message-body p { margin: 0 0 12px; }
+
+  .message-id {
+    display: inline-block;
+    background: rgba(124, 58, 237, 0.08);
+    border: 1px solid rgba(124, 58, 237, 0.25);
+    color: #dbeafe;
+    font-weight: 800;
+    padding: 8px 12px;
+    border-radius: 10px;
+    letter-spacing: 1px;
+    margin: 8px 0 12px;
+  }
+
+  .message-actions {
+    display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap;
+  }
+
+  .message-actions button, .message-actions a {
+    padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer;
+    text-decoration: none; font-weight: 700; display: inline-block;
+  }
+
+  .message-actions button {
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--text);
+  }
+
+  .message-actions a {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+  }
+
+  @media (max-width: 760px) {
+    body { padding: 18px; }
+    .container { padding: 18px 16px 20px; }
+    .topbar { align-items: flex-start; }
+    .toolbar { width: 100%; }
+    .toolbar button { flex: 1; }
+    table { display: block; overflow-x: auto; }
+    .message-actions { justify-content: stretch; }
+    .message-actions a, .message-actions button { flex: 1; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Product Catalog & Order System</h1>
+      </div>
+    </header>
+  <div id="statusBox"></div>
+
+  <!-- Products Table -->
+  <h2>Available Products</h2>
+  <table id="productsTable">
+    <thead>
+      <tr>
+        <th>Serial No.</th>
+        <th>Product Name</th>
+        <th>Description</th>
+        <th>Price (INR)</th>
+        <th>Quantity</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="productsBody">
+      <tr><td colspan="6" style="text-align:center;">Loading products...</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Cart -->
+  <div class="cart-summary">
+    <h2>🛒 Your Cart</h2>
+    <table id="cartTable">
+      <thead>
+        <tr>
+          <th>Serial No.</th>
+          <th>Product Name</th>
+          <th>Price (INR)</th>
+          <th>Qty</th>
+          <th>Subtotal (INR)</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="cartBody">
+        <tr><td colspan="6" style="text-align:center;">Cart is empty</td></tr>
+      </tbody>
+    </table>
+    <p class="total">Total: ₹<span id="totalAmount">0.00</span></p>
+  </div>
+
+  <!-- User Info Form -->
+  <div class="user-form">
+    <h2>👤 Customer Details</h2>
+    <label for="userName">Full Name:</label>
+    <input type="text" id="userName" placeholder="Enter your full name">
+    <label for="userAddress">Full Address:</label>
+    <textarea id="userAddress" rows="3" placeholder="Enter your full address"></textarea>
+    <label for="userPhone">Phone Number:</label>
+    <input type="tel" id="userPhone" placeholder="e.g. +1 555 123 4567">
+    <br><br>
+    <button class="checkout" onclick="checkout()">✔ Confirm Order & Get Unique ID</button>
+  </div>
+
+  <!-- Confirmation -->
+  <div id="confirmation" class="confirmation">
+    <h3>✅ Order Confirmed!</h3>
+    <p>Your order has been successfully placed. Please save your Unique ID below as acknowledgement:</p>
+    <p>Your Unique ID: <span class="uid-display" id="uniqueIdDisplay"></span></p>
+  </div>
+</div>
+
+<div id="orderMessageModal" class="message-overlay" role="dialog" aria-modal="true" aria-labelledby="orderMessageTitle">
+  <div class="message-box">
+    <div class="message-header" id="orderMessageTitle">✅ Order Confirmed</div>
+    <div class="message-body">
+      <p>Your order has been placed successfully.</p>
+      <p>Unique ID:</p>
+      <div id="modalUniqueId" class="message-id">-</div>
+      <p>Please take a screenshot of this confirmation and send it to WhatsApp number <strong>9003357888</strong> for further reference.</p>
+      <div class="message-actions">
+        <a id="whatsappLink" href="#" target="_blank" rel="noopener noreferrer">Send on WhatsApp</a>
+        <button onclick="closeMessageBox()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let products = [];
+  let cart = []; // { serial, name, price, qty }
+
+  // ---------- Load products.xlsx ----------
+  async function loadProducts() {
+    try {
+      const response = await fetch('products.xlsx');
+      if (!response.ok) throw new Error('products.xlsx not found in root path');
+      const data = await response.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+      if (json.length === 0) throw new Error('products.xlsx is empty');
+
+      products = json.map(row => ({
+        serial: row['Product Serial Number'] ?? row['Serial Number'] ?? row['Serial'] ?? row['serial'] ?? '',
+        name:   row['Product Name'] ?? row['Name'] ?? row['name'] ?? '',
+        desc:   row['Product Description'] ?? row['Description'] ?? row['desc'] ?? '',
+        price:  parseFloat(row['Product Price'] ?? row['Price'] ?? row['price'] ?? 0)
+      }));
+
+      renderProducts();
+      showStatus('Products loaded successfully. Total: ' + products.length, 'info');
+    } catch (err) {
+      document.getElementById('productsBody').innerHTML =
+        `<tr><td colspan="6" style="color:red;text-align:center;">
+          Error: ${err.message}<br>
+          Make sure <b>products.xlsx</b> exists in the same folder as this HTML file.
+        </td></tr>`;
+      showStatus('Error loading products.xlsx: ' + err.message, 'error');
+    }
+  }
+
+  function renderProducts() {
+    const tbody = document.getElementById('productsBody');
+    tbody.innerHTML = '';
+    products.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p.serial}</td>
+        <td>${p.name}</td>
+        <td>${p.desc}</td>
+        <td>${p.price.toFixed(2)}</td>
+        <td><input type="number" min="1" value="1" id="qty-${p.serial}"></td>
+        <td><button onclick="addToCart('${p.serial}')">Add to Cart</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ---------- Cart operations ----------
+  function addToCart(serial) {
+    const qtyInput = document.getElementById('qty-' + serial);
+    const qty = parseInt(qtyInput.value);
+    if (!qty || qty < 1) { alert('Please enter a valid quantity'); return; }
+
+    const product = products.find(p => p.serial == serial);
+    const existing = cart.find(c => c.serial == serial);
+
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      cart.push({ serial: product.serial, name: product.name, price: product.price, qty: qty });
+    }
+    renderCart();
+  }
+
+  function removeFromCart(serial) {
+    cart = cart.filter(c => c.serial != serial);
+    renderCart();
+  }
+
+  function updateQty(serial, newQty) {
+    const item = cart.find(c => c.serial == serial);
+    if (item) {
+      item.qty = Math.max(1, parseInt(newQty) || 1);
+      renderCart();
+    }
+  }
+
+  function renderCart() {
+    const tbody = document.getElementById('cartBody');
+    tbody.innerHTML = '';
+    let total = 0;
+    if (cart.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Cart is empty</td></tr>';
+    } else {
+      cart.forEach(c => {
+        const sub = c.price * c.qty;
+        total += sub;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${c.serial}</td>
+          <td>${c.name}</td>
+          <td>${c.price.toFixed(2)}</td>
+          <td><input type="number" min="1" value="${c.qty}"
+               onchange="updateQty('${c.serial}', this.value)"></td>
+          <td>${sub.toFixed(2)}</td>
+          <td><button class="remove" onclick="removeFromCart('${c.serial}')">Remove</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    document.getElementById('totalAmount').textContent = total.toFixed(2);
+  }
+
+  // ---------- Unique ID generator ----------
+  function generateUniqueId() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const prefix = 'UID';
+    const timestamp = Date.now().toString(36).toUpperCase();
+    let rand = '';
+    for (let i = 0; i < 5; i++) {
+      rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return prefix + '-' + timestamp + '-' + rand;
+  }
+
+  function showOrderMessageBox(uniqueId) {
+    const modal = document.getElementById('orderMessageModal');
+    const uidBox = document.getElementById('modalUniqueId');
+    const whatsappLink = document.getElementById('whatsappLink');
+    const msg = `Order confirmed. My Unique ID is ${uniqueId}. Please find my order screenshot for reference.`;
+
+    uidBox.textContent = uniqueId;
+    whatsappLink.href = `https://wa.me/919003357888?text=${encodeURIComponent(msg)}`;
+    modal.style.display = 'flex';
+  }
+
+  function closeMessageBox() {
+    document.getElementById('orderMessageModal').style.display = 'none';
+  }
+
+  async function saveOrderRequest(payload) {
+    const endpoints = ['/save-order.php', '/save-order'];
+    let lastError = 'Unable to save order file.';
+
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        let result;
+        try {
+          result = await response.json();
+        } catch {
+          result = { success: false, message: 'Invalid response from server.' };
+        }
+
+        if (response.ok && result.success) {
+          return result;
+        }
+
+        lastError = result.message || `HTTP ${response.status}`;
+        if (response.status !== 404) {
+          throw new Error(lastError);
+        }
+      } catch (err) {
+        lastError = err.message || lastError;
+      }
+    }
+
+    throw new Error(lastError);
+  }
+
+  // ---------- Checkout ----------
+  async function checkout() {
+    if (cart.length === 0) { alert('Your cart is empty!'); return; }
+
+    const name    = document.getElementById('userName').value.trim();
+    const address = document.getElementById('userAddress').value.trim();
+    const phone   = document.getElementById('userPhone').value.trim();
+
+    if (!name)    { alert('Please enter your full name'); return; }
+    if (!address) { alert('Please enter your address'); return; }
+    if (!phone)   { alert('Please enter your phone number'); return; }
+
+    const uniqueId = generateUniqueId();
+
+    const rows = cart.map(c => ({
+      'Product Serial Number': c.serial,
+      'Quantity': c.qty,
+      'Unique User ID': uniqueId,
+      'Customer Name': name,
+      'Address': address,
+      'Phone Number': phone
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Orders');
+    const fileName = `${uniqueId}.xlsx`;
+    const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+
+    try {
+      const result = await saveOrderRequest({
+        fileName,
+        data: Array.from(new Uint8Array(buffer))
+      });
+
+      document.getElementById('uniqueIdDisplay').textContent = uniqueId;
+      document.getElementById('confirmation').style.display = 'block';
+      document.getElementById('confirmation').scrollIntoView({ behavior: 'smooth' });
+      showOrderMessageBox(uniqueId);
+      showStatus('Order placed! Your Unique ID: ' + uniqueId, 'info');
+    } catch (err) {
+      showStatus('Could not save order file: ' + err.message, 'error');
+      alert('Could not save order file. Please contact support.');
+    }
+  }
+
+  // ---------- Status helper ----------
+  function showStatus(msg, type) {
+    const box = document.getElementById('statusBox');
+    box.innerHTML = `<div class="status ${type}">${msg}</div>`;
+  }
+
+  // Init
+  loadProducts();
+</script>
+
+</body>
+</html>

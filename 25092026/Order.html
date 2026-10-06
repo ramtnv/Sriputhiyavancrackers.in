@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Product Catalog & Order System</title>
+<!-- SheetJS library for Excel read/write -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { margin: 0; padding: 20px; background: #f4f6f9; color: #333; }
+  h1 { text-align: center; color: #2c3e50; }
+  h2 { color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 6px; }
+
+  .container { max-width: 1200px; margin: auto; }
+
+  table { width: 100%; border-collapse: collapse; background: #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 25px; }
+  th, td { padding: 10px 12px; border: 1px solid #e0e0e0; text-align: left; }
+  th { background: #3498db; color: #fff; }
+  tr:nth-child(even) { background: #f9f9f9; }
+
+  button { cursor: pointer; padding: 8px 14px; border: none; border-radius: 4px;
+           background: #27ae60; color: #fff; font-weight: bold; }
+  button:hover { background: #1e8449; }
+  button.remove { background: #e74c3c; }
+  button.remove:hover { background: #c0392b; }
+  button.checkout { background: #8e44ad; padding: 12px 24px; font-size: 16px; }
+  button.checkout:hover { background: #6c3483; }
+
+  input[type="number"] { width: 60px; padding: 4px; }
+  input[type="text"], input[type="tel"], textarea {
+    width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;
+  }
+
+  .cart-summary { background: #fff; padding: 20px; border-radius: 6px;
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 20px; }
+  .total { font-size: 22px; font-weight: bold; color: #e67e22; }
+
+  .user-form { background: #fff; padding: 20px; border-radius: 6px;
+               box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 20px; }
+  .user-form label { display: block; margin-top: 10px; font-weight: 600; }
+
+  .confirmation { display: none; background: #d4edda; color: #155724;
+                  padding: 20px; border-radius: 6px; border: 1px solid #c3e6cb;
+                  margin-bottom: 20px; }
+  .confirmation h3 { margin-top: 0; }
+  .uid-display { font-size: 24px; font-weight: bold; color: #0c5460;
+                 background: #fff; padding: 10px; border-radius: 4px;
+                 display: inline-block; letter-spacing: 2px; }
+
+  .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+  .status.error { background: #f8d7da; color: #721c24; }
+  .status.info  { background: #d1ecf1; color: #0c5460; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🛍️ Product Catalog & Order System</h1>
+
+  <div id="statusBox"></div>
+
+  <!-- Products Table -->
+  <h2>Available Products</h2>
+  <table id="productsTable">
+    <thead>
+      <tr>
+        <th>Serial No.</th>
+        <th>Product Name</th>
+        <th>Description</th>
+        <th>Price ($)</th>
+        <th>Quantity</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="productsBody">
+      <tr><td colspan="6" style="text-align:center;">Loading products...</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Cart -->
+  <div class="cart-summary">
+    <h2>🛒 Your Cart</h2>
+    <table id="cartTable">
+      <thead>
+        <tr>
+          <th>Serial No.</th>
+          <th>Product Name</th>
+          <th>Price ($)</th>
+          <th>Qty</th>
+          <th>Subtotal ($)</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="cartBody">
+        <tr><td colspan="6" style="text-align:center;">Cart is empty</td></tr>
+      </tbody>
+    </table>
+    <p class="total">Total: $<span id="totalAmount">0.00</span></p>
+  </div>
+
+  <!-- User Info Form -->
+  <div class="user-form">
+    <h2>👤 Customer Details</h2>
+    <label>Full Address:</label>
+    <textarea id="userAddress" rows="3" placeholder="Enter your full address"></textarea>
+    <label>Phone Number:</label>
+    <input type="tel" id="userPhone" placeholder="e.g. +1 555 123 4567">
+    <br><br>
+    <button class="checkout" onclick="checkout()">✔ Confirm Order & Get Unique ID</button>
+  </div>
+
+  <!-- Confirmation -->
+  <div id="confirmation" class="confirmation">
+    <h3>✅ Order Confirmed!</h3>
+    <p>Your order has been successfully placed. Please save your Unique ID below as acknowledgement:</p>
+    <p>Your Unique ID: <span class="uid-display" id="uniqueIdDisplay"></span></p>
+    <p>A file named <strong>endExcel.xlsx</strong> has been downloaded with your order details.</p>
+  </div>
+</div>
+
+<script>
+  let products = [];
+  let cart = []; // { serial, name, price, qty }
+
+  // ---------- Load products.xlsx ----------
+  async function loadProducts() {
+    try {
+      const response = await fetch('products.xlsx');
+      if (!response.ok) throw new Error('products.xlsx not found in root path');
+      const data = await response.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+      if (json.length === 0) throw new Error('products.xlsx is empty');
+
+      products = json.map(row => ({
+        serial: row['Product Serial Number'] ?? row['Serial Number'] ?? row['Serial'] ?? row['serial'] ?? '',
+        name:   row['Product Name'] ?? row['Name'] ?? row['name'] ?? '',
+        desc:   row['Product Description'] ?? row['Description'] ?? row['desc'] ?? '',
+        price:  parseFloat(row['Product Price'] ?? row['Price'] ?? row['price'] ?? 0)
+      }));
+
+      renderProducts();
+      showStatus('Products loaded successfully. Total: ' + products.length, 'info');
+    } catch (err) {
+      document.getElementById('productsBody').innerHTML =
+        `<tr><td colspan="6" style="color:red;text-align:center;">
+          Error: ${err.message}<br>
+          Make sure <b>products.xlsx</b> exists in the same folder as this HTML file.
+        </td></tr>`;
+      showStatus('Error loading products.xlsx: ' + err.message, 'error');
+    }
+  }
+
+  function renderProducts() {
+    const tbody = document.getElementById('productsBody');
+    tbody.innerHTML = '';
+    products.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p.serial}</td>
+        <td>${p.name}</td>
+        <td>${p.desc}</td>
+        <td>${p.price.toFixed(2)}</td>
+        <td><input type="number" min="1" value="1" id="qty-${p.serial}"></td>
+        <td><button onclick="addToCart('${p.serial}')">Add to Cart</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ---------- Cart operations ----------
+  function addToCart(serial) {
+    const qtyInput = document.getElementById('qty-' + serial);
+    const qty = parseInt(qtyInput.value);
+    if (!qty || qty < 1) { alert('Please enter a valid quantity'); return; }
+
+    const product = products.find(p => p.serial == serial);
+    const existing = cart.find(c => c.serial == serial);
+
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      cart.push({ serial: product.serial, name: product.name, price: product.price, qty: qty });
+    }
+    renderCart();
+  }
+
+  function removeFromCart(serial) {
+    cart = cart.filter(c => c.serial != serial);
+    renderCart();
+  }
+
+  function updateQty(serial, newQty) {
+    const item = cart.find(c => c.serial == serial);
+    if (item) {
+      item.qty = Math.max(1, parseInt(newQty) || 1);
+      renderCart();
+    }
+  }
+
+  function renderCart() {
+    const tbody = document.getElementById('cartBody');
+    tbody.innerHTML = '';
+    let total = 0;
+    if (cart.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Cart is empty</td></tr>';
+    } else {
+      cart.forEach(c => {
+        const sub = c.price * c.qty;
+        total += sub;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${c.serial}</td>
+          <td>${c.name}</td>
+          <td>${c.price.toFixed(2)}</td>
+          <td><input type="number" min="1" value="${c.qty}"
+               onchange="updateQty('${c.serial}', this.value)"></td>
+          <td>${sub.toFixed(2)}</td>
+          <td><button class="remove" onclick="removeFromCart('${c.serial}')">Remove</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    document.getElementById('totalAmount').textContent = total.toFixed(2);
+  }
+
+  // ---------- Unique ID generator ----------
+  function generateUniqueId() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const prefix = 'UID';
+    const timestamp = Date.now().toString(36).toUpperCase();
+    let rand = '';
+    for (let i = 0; i < 5; i++) {
+      rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return prefix + '-' + timestamp + '-' + rand;
+  }
+
+  // ---------- Checkout ----------
+  function checkout() {
+    if (cart.length === 0) { alert('Your cart is empty!'); return; }
+
+    const address = document.getElementById('userAddress').value.trim();
+    const phone   = document.getElementById('userPhone').value.trim();
+
+    if (!address) { alert('Please enter your address'); return; }
+    if (!phone)   { alert('Please enter your phone number'); return; }
+
+    const uniqueId = generateUniqueId();
+
+    // Build rows for endExcel.xlsx
+    const rows = cart.map(c => ({
+      'Product Serial Number': c.serial,
+      'Quantity': c.qty,
+      'Unique User ID': uniqueId,
+      'Address': address,
+      'Phone Number': phone
+    }));
+
+    // Create workbook & download
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Orders');
+    XLSX.writeFile(wb, 'endExcel.xlsx');
+
+    // Show confirmation
+    document.getElementById('uniqueIdDisplay').textContent = uniqueId;
+    document.getElementById('confirmation').style.display = 'block';
+    document.getElementById('confirmation').scrollIntoView({ behavior: 'smooth' });
+
+    showStatus('Order placed! Your Unique ID: ' + uniqueId, 'info');
+  }
+
+  // ---------- Status helper ----------
+  function showStatus(msg, type) {
+    const box = document.getElementById('statusBox');
+    box.innerHTML = `<div class="status ${type}">${msg}</div>`;
+  }
+
+  // Init
+  loadProducts();
+</script>
+
+</body>
+</html>

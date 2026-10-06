@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Mano</title>
+    <style>
+      :root {
+        --bg1: #0f172a;
+        --bg2: #1d4ed8;
+        --bg3: #7c3aed;
+        --panel: rgba(15, 23, 42, 0.72);
+        --panel-border: rgba(255, 255, 255, 0.18);
+        --text: #e2e8f0;
+        --muted: #cbd5e1;
+        --primary: #38bdf8;
+        --primary-dark: #0284c7;
+        --shadow: rgba(15, 23, 42, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--text);
+        background: linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+        background-size: 200% 200%;
+        animation: gradientShift 12s ease infinite;
+      }
+
+      @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      .card {
+        width: min(90vw, 480px);
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        box-shadow: 0 20px 45px var(--shadow);
+        border-radius: 22px;
+        padding: 32px 28px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(1.7rem, 3vw, 2.4rem);
+        text-align: center;
+        letter-spacing: 0.04em;
+      }
+
+      .subtitle {
+        margin: 0 0 28px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.96rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .input-wrap {
+        position: relative;
+      }
+
+      input {
+        width: 100%;
+        padding: 16px 16px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(15, 23, 42, 0.55);
+        color: var(--text);
+        outline: none;
+        font-size: 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+      }
+
+      button {
+        width: 100%;
+        border: none;
+        border-radius: 12px;
+        padding: 15px 18px;
+        margin-top: 22px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 10px 24px rgba(56, 189, 248, 0.35);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .note {
+        margin-top: 18px;
+        text-align: center;
+        font-size: 0.8rem;
+        color: rgba(226, 232, 240, 0.8);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Admin Mano</h1>
+      <p class="subtitle">Download the Excel file for the entered unique ID.</p>
+
+      <form id="downloadForm">
+        <label for="uniqueId">Unique ID</label>
+        <div class="input-wrap">
+          <input
+            type="text"
+            id="uniqueId"
+            name="uniqueId"
+            placeholder="Enter unique ID"
+            autocomplete="off"
+            required
+          />
+        </div>
+
+        <button type="submit">Download</button>
+      </form>
+
+      <div class="note">File location: /orderfiles</div>
+    </div>
+
+    <script>
+      const form = document.getElementById('downloadForm');
+      const input = document.getElementById('uniqueId');
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const uniqueId = input.value.trim();
+        if (!uniqueId) {
+          alert('Please enter a unique ID.');
+          input.focus();
+          return;
+        }
+
+        const fileUrl = '/orderfiles/' + encodeURIComponent(uniqueId) + '.xlsx';
+        window.location.href = fileUrl;
+      });
+    </script>
+  </body>
+</html>

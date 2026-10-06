@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quotation - Sri Puthiyavan Firecrackers</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #b22222;
+      --dark: #222;
+      --muted: #666;
+      --line: #d9d9d9;
+      --bg: #f8f8f8;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #eef1f4;
+      color: var(--dark);
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 30px auto;
+      background: var(--white);
+      box-shadow: 0 0 18px rgba(0,0,0,0.08);
+      border: 1px solid var(--line);
+      padding: 28px 30px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 12px;
+    }
+
+    .header h1 {
+      margin: 0;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+      font-size: 30px;
+    }
+
+    .meta-grid, .customer-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 16px 30px;
+      margin-bottom: 18px;
+    }
+
+    .field {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 8px;
+    }
+
+    .field label {
+      min-width: 135px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .field input, .field textarea {
+      flex: 1;
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      font-size: 15px;
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 68px;
+    }
+
+    .section-title {
+      margin: 20px 0 10px;
+      font-size: 18px;
+      color: var(--dark);
+      font-weight: 700;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 15px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #f3f3f3;
+      color: var(--dark);
+      font-weight: 700;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .totals-box {
+      margin-top: 18px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .totals {
+      width: 280px;
+      border: 1px solid var(--line);
+      background: #fafafa;
+    }
+
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 15px;
+    }
+
+    .totals-row:last-child {
+      border-bottom: none;
+      font-weight: 700;
+      background: #f2f2f2;
+    }
+
+    .footer {
+      margin-top: 34px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+      font-style: italic;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    button {
+      border: none;
+      padding: 11px 18px;
+      font-size: 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    button.secondary {
+      background: #555;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .page {
+        max-width: none;
+        margin: 0;
+        box-shadow: none;
+        border: none;
+        padding: 0;
+      }
+
+      .products-panel,
+      .actions {
+        display: none !important;
+      }
+
+      .field input, .field textarea, .field {
+        border: none;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>Sri Puthiyavan Firecrackers</h1>
+    </div>
+
+    <div class="meta-grid">
+      <div class="field">
+        <label>Quotation No:</label>
+        <input id="quoteNo" type="text" readonly />
+      </div>
+      <div class="field">
+        <label>Date:</label>
+        <input id="quoteDate" type="text" readonly />
+      </div>
+    </div>
+
+    <div class="section-title">Customer Details</div>
+    <div class="customer-grid">
+      <div class="field">
+        <label>Customer Name:</label>
+        <input id="customerName" type="text" value="M. Kumar" />
+      </div>
+      <div class="field">
+        <label>Mobile Number:</label>
+        <input id="mobileNumber" type="tel" value="9876543210" />
+      </div>
+      <div class="field" style="grid-column: 1 / -1;">
+        <label>Address:</label>
+        <textarea id="address">12, Market Road, Madurai</textarea>
+      </div>
+    </div>
+
+    <div class="products-panel">
+      <div class="section-title">Available Products</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 12%;">S.No</th>
+            <th style="width: 30%;">Product Name</th>
+            <th style="width: 28%;">Description</th>
+            <th style="width: 12%;">Price</th>
+            <th style="width: 10%;">Qty</th>
+            <th style="width: 8%;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="productsTableBody">
+          <tr><td colspan="6" style="text-align:center;">Loading products...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">Order Details</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 42%;">Product Name</th>
+          <th style="width: 15%;">Qty</th>
+          <th style="width: 18%;">Unit Price</th>
+          <th style="width: 20%;">Amount</th>
+        </tr>
+      </thead>
+      <tbody id="orderTableBody">
+        <tr><td colspan="4" style="text-align:center;">Cart is empty. Add products from the list above.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="totals-box">
+      <div class="totals">
+        <div class="totals-row">
+          <span>Sub Total</span>
+          <span id="subTotal">₹960.00</span>
+        </div>
+        <div class="totals-row">
+          <span>Tax (0%)</span>
+          <span id="taxTotal">₹0.00</span>
+        </div>
+        <div class="totals-row">
+          <span>Total</span>
+          <span id="grandTotal">₹960.00</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="secondary" onclick="window.location.reload()">Reset</button>
+      <button type="button" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+
+    <div class="footer">
+      This is a printed copy. No signature required.
+    </div>
+  </div>
+
+  <script>
+    let products = [];
+    let cart = [];
+
+    function generateQuoteNumber() {
+      return Math.floor(10000 + Math.random() * 90000);
+    }
+
+    function formatCurrency(value) {
+      return '₹' + Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    async function loadProducts() {
+      try {
+        const response = await fetch('products.xlsx');
+        if (!response.ok) throw new Error('products.xlsx not found in root path');
+
+        const data = await response.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+        if (json.length === 0) throw new Error('products.xlsx is empty');
+
+        products = json.map(row => ({
+          serial: row['Product Serial Number'] ?? row['Serial Number'] ?? row['Serial'] ?? row['serial'] ?? '',
+          name: row['Product Name'] ?? row['Name'] ?? row['name'] ?? '',
+          desc: row['Product Description'] ?? row['Description'] ?? row['desc'] ?? '',
+          price: parseFloat(row['Product Price'] ?? row['Price'] ?? row['price'] ?? 0)
+        })).filter(p => p.name && p.price >= 0);
+
+        renderProducts();
+      } catch (error) {
+        const tbody = document.getElementById('productsTableBody');
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Error loading products.xlsx: ' + error.message + '</td></tr>';
+      }
+    }
+
+    function renderProducts() {
+      const tbody = document.getElementById('productsTableBody');
+      tbody.innerHTML = '';
+
+      if (products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No products found.</td></tr>';
+        return;
+      }
+
+      products.forEach(product => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${product.serial || '-'}</td>
+          <td>${product.name}</td>
+          <td>${product.desc || '-'}</td>
+          <td>${formatCurrency(product.price)}</td>
+          <td><input type="number" min="1" value="1" id="qty-${product.serial || product.name}" style="width: 100%; border: 1px solid #ddd; padding: 7px;" /></td>
+          <td><button type="button" onclick="addToCart('${product.serial || product.name}')">Add</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addToCart(serial) {
+      const key = String(serial);
+      const qtyInput = document.getElementById('qty-' + key);
+      const qty = parseInt(qtyInput ? qtyInput.value : '1', 10);
+
+      if (!Number.isFinite(qty) || qty < 1) {
+        alert('Please enter a valid quantity');
+        return;
+      }
+
+      const product = products.find(item => String(item.serial || item.name) === key);
+      if (!product) return;
+
+      const existing = cart.find(item => String(item.serial || item.name) === key);
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        cart.push({ serial: product.serial || product.name, name: product.name, price: product.price, qty });
+      }
+
+      renderCart();
+    }
+
+    function removeFromCart(serial) {
+      cart = cart.filter(item => String(item.serial || item.name) !== String(serial));
+      renderCart();
+    }
+
+    function renderCart() {
+      const rows = document.querySelectorAll('#orderTableBody tr');
+      rows.forEach(row => row.remove());
+
+      if (cart.length === 0) {
+        document.getElementById('orderTableBody').innerHTML = '<tr><td colspan="4" style="text-align:center;">Cart is empty. Add products from the list above.</td></tr>';
+      } else {
+        cart.forEach(item => {
+          const row = document.createElement('tr');
+          const amount = item.qty * item.price;
+          row.innerHTML = `
+            <td>${item.name}</td>
+            <td><input type="number" min="1" value="${item.qty}" class="qty" data-serial="${String(item.serial || item.name)}" style="width: 100%; border: 1px solid #ddd; padding: 7px;" /></td>
+            <td><input type="number" min="0" step="0.01" value="${item.price}" class="price" data-serial="${String(item.serial || item.name)}" style="width: 100%; border: 1px solid #ddd; padding: 7px;" /></td>
+            <td class="amount right">${formatCurrency(amount)}</td>
+          `;
+          document.getElementById('orderTableBody').appendChild(row);
+        });
+      }
+
+      bindCartInputs();
+      updateTotals();
+    }
+
+    function bindCartInputs() {
+      document.querySelectorAll('#orderTableBody .qty, #orderTableBody .price').forEach(el => {
+        el.oninput = function () {
+          const serial = String(el.dataset.serial);
+          const item = cart.find(product => String(product.serial || product.name) === serial);
+          if (!item) return;
+
+          if (el.classList.contains('qty')) {
+            item.qty = Math.max(0, parseInt(el.value || '0', 10) || 0);
+            if (item.qty === 0) {
+              removeFromCart(serial);
+              return;
+            }
+          } else if (el.classList.contains('price')) {
+            item.price = Math.max(0, parseFloat(el.value || '0') || 0);
+          }
+
+          renderCart();
+        };
+      });
+    }
+
+    function updateTotals() {
+      let total = 0;
+      cart.forEach(item => {
+        total += item.qty * item.price;
+      });
+
+      document.getElementById('subTotal').textContent = formatCurrency(total);
+      document.getElementById('taxTotal').textContent = formatCurrency(0);
+      document.getElementById('grandTotal').textContent = formatCurrency(total);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const quoteInput = document.getElementById('quoteNo');
+      quoteInput.value = generateQuoteNumber();
+
+      const today = new Date();
+      document.getElementById('quoteDate').value = today.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+
+      loadProducts();
+      renderCart();
+    });
+  </script>
+</body>
+</html>
