@@ -304,20 +304,145 @@
     }
 
     @media (max-width: 760px) {
+      .page {
+        width: calc(100% - 24px);
+        min-width: 0;
+        margin: 12px auto;
+      }
+
+      .header,
+      .content,
+      .box,
+      .products-panel,
+      .items {
+        min-width: 0;
+      }
+
+      .content {
+        padding: 16px;
+      }
+
       .top-grid,
       .field-row,
       .totals-grid {
         grid-template-columns: 1fr;
       }
 
+      .field-row > .field[style] {
+        grid-column: auto !important;
+      }
+
       .header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
+        padding: 20px;
+      }
+
+      .company h1 {
+        font-size: clamp(22px, 7vw, 28px);
+        overflow-wrap: anywhere;
       }
 
       .meta {
         text-align: left;
+      }
+
+      .products-panel,
+      .items {
+        overflow: visible;
+      }
+
+      table {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        overflow: visible;
+      }
+
+      thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        clip-path: inset(50%);
+      }
+
+      tbody {
+        display: grid;
+        gap: 10px;
+      }
+
+      tbody tr {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      tbody td {
+        min-width: 0;
+        padding: 9px 10px;
+        overflow-wrap: anywhere;
+        border-bottom: 1px solid var(--line);
+      }
+
+      tbody td::before {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+      }
+
+      #productsTableBody td:nth-child(1)::before { content: "S.No"; }
+      #productsTableBody td:nth-child(2)::before { content: "Product"; }
+      #productsTableBody td:nth-child(3)::before { content: "Description"; }
+      #productsTableBody td:nth-child(4)::before { content: "Price"; }
+      #productsTableBody td:nth-child(5)::before { content: "Quantity"; }
+      #productsTableBody td:nth-child(6)::before { content: "Action"; }
+
+      #productsTableBody td:nth-child(2),
+      #productsTableBody td:nth-child(3) {
+        grid-column: 1 / -1;
+      }
+
+      #orderTableBody td:nth-child(1)::before { content: "#"; }
+      #orderTableBody td:nth-child(2)::before { content: "Item"; }
+      #orderTableBody td:nth-child(3)::before { content: "Quantity"; }
+      #orderTableBody td:nth-child(4)::before { content: "Rate"; }
+      #orderTableBody td:nth-child(5)::before { content: "Amount"; }
+
+      td[colspan] {
+        grid-column: 1 / -1;
+        text-align: center;
+      }
+
+      td[colspan]::before {
+        content: none !important;
+      }
+
+      tbody input[type="number"] {
+        width: 100%;
+        min-width: 0;
+      }
+
+      tbody button {
+        max-width: 100%;
+        padding: 9px 10px;
+        overflow-wrap: anywhere;
+      }
+
+      .totals-box {
+        padding: 14px;
       }
 
       .actions {
@@ -326,6 +451,10 @@
 
       button {
         width: 100%;
+      }
+
+      .status {
+        overflow-wrap: anywhere;
       }
     }
   </style>

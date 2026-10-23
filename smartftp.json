@@ -1,0 +1,21 @@
+{
+  "name": "sriputhiyavancrackers",
+  "host": "178.16.136.153",
+  "protocol": "ftp",
+  "port": 21,
+  "username": "u817254907.sriputhiyavancrackers.in",
+  "password": "M@no.d5656",
+  "remotePath": "/public_html",
+  "uploadOnSave": true,
+  "useTempFile": false,
+  "openSsh": false,
+  "watcher": {
+    "files": "**/*",
+    "autoUpload": true,
+    "autoDelete": false,
+    "ignoreCreate": false,
+    "ignoreUpdate": false,
+    "ignoreDelete": true
+  },
+  "ignore": []
+}

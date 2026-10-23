@@ -173,6 +173,131 @@
       background: #555;
     }
 
+    @media (max-width: 680px) {
+      html { overflow-x: clip; }
+
+      body {
+        width: 100%;
+        min-width: 0;
+        padding: 0 12px;
+        overflow-x: clip;
+      }
+
+      .page {
+        width: 100%;
+        min-width: 0;
+        margin: 12px auto;
+        padding: 20px 14px;
+      }
+
+      .header h1 {
+        font-size: clamp(23px, 7vw, 30px);
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+      }
+
+      .meta-grid,
+      .customer-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .field {
+        min-width: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+      }
+
+      .field label {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .field input,
+      .field textarea {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .customer-grid .field[style] { grid-column: auto !important; }
+
+      table {
+        display: block;
+        width: 100%;
+        overflow: visible;
+        font-size: 13px;
+      }
+
+      thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        clip-path: inset(50%);
+      }
+
+      tbody { display: grid; gap: 10px; }
+
+      tbody tr {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      td {
+        min-width: 0;
+        padding: 9px 8px;
+        overflow-wrap: anywhere;
+      }
+
+      td::before {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      #productsTableBody td:nth-child(1)::before { content: "S.No"; }
+      #productsTableBody td:nth-child(2)::before { content: "Product"; }
+      #productsTableBody td:nth-child(3)::before { content: "Description"; }
+      #productsTableBody td:nth-child(4)::before { content: "Price"; }
+      #productsTableBody td:nth-child(5)::before { content: "Quantity"; }
+      #productsTableBody td:nth-child(6)::before { content: "Action"; }
+
+      #productsTableBody td:nth-child(2),
+      #productsTableBody td:nth-child(3) { grid-column: 1 / -1; }
+
+      #orderTableBody td:nth-child(1)::before { content: "Product"; }
+      #orderTableBody td:nth-child(2)::before { content: "Quantity"; }
+      #orderTableBody td:nth-child(3)::before { content: "Unit price"; }
+      #orderTableBody td:nth-child(4)::before { content: "Amount"; }
+      td[colspan] { grid-column: 1 / -1; }
+      td[colspan]::before { content: none !important; }
+
+      .products-panel { min-width: 0; }
+
+      .totals-box { justify-content: stretch; }
+      .totals { width: 100%; max-width: 320px; }
+
+      .actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .actions button {
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+    }
+
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button {
       -webkit-appearance: none;

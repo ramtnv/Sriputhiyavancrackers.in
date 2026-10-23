@@ -94,6 +94,59 @@
         box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
       }
 
+      select {
+        width: 100%;
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(15, 23, 42, 0.55);
+        color: var(--text);
+        outline: none;
+        font-size: 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+      }
+
+      select option {
+        background: var(--bg1);
+        color: var(--text);
+      }
+
+      select:disabled,
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+      }
+
+      .order-list {
+        margin-top: 30px;
+        padding-top: 24px;
+        border-top: 1px solid var(--panel-border);
+      }
+
+      .order-list h2 {
+        margin: 0 0 18px;
+        font-size: 1.2rem;
+        text-align: center;
+      }
+
+      .order-list button {
+        margin-top: 4px;
+      }
+
+      .order-status {
+        min-height: 1.25em;
+        margin: 14px 0 0;
+        color: var(--muted);
+        font-size: 0.85rem;
+        line-height: 1.5;
+        text-align: center;
+      }
+
       button {
         width: 100%;
         border: none;
@@ -147,6 +200,16 @@
       </form>
 
       <div class="note">File location: /orderfiles</div>
+
+      <section class="order-list" aria-labelledby="orderListTitle">
+        <h2 id="orderListTitle">Browse saved orders</h2>
+        <label for="orderSelect">Customer name</label>
+        <select id="orderSelect" disabled>
+          <option value="">Loading saved orders…</option>
+        </select>
+        <button id="openOrderButton" type="button" disabled>Open selected order</button>
+        <p class="order-status" id="orderStatus" aria-live="polite"></p>
+      </section>
     </div>
 
     <script>
@@ -166,6 +229,57 @@
         const fileUrl = '/orderfiles/' + encodeURIComponent(uniqueId) + '.xlsx';
         window.location.href = fileUrl;
       });
+
+      const orderSelect = document.getElementById('orderSelect');
+      const openOrderButton = document.getElementById('openOrderButton');
+      const orderStatus = document.getElementById('orderStatus');
+      let savedOrders = [];
+
+      async function loadSavedOrders() {
+        try {
+          const response = await fetch('/api/orders.php');
+          if (!response.ok) {
+            let message = `HTTP ${response.status}`;
+            try {
+              const errorResult = await response.json();
+              if (errorResult.message) message = errorResult.message;
+            } catch {
+              // Use the HTTP status if the server did not return JSON.
+            }
+            throw new Error(message);
+          }
+
+          const result = await response.json();
+          if (!Array.isArray(result.orders)) throw new Error('Invalid order list response.');
+
+          savedOrders = result.orders;
+          orderSelect.replaceChildren(new Option('Choose a saved order', ''));
+          savedOrders.forEach((order, index) => {
+            orderSelect.add(new Option(order.name, String(index)));
+          });
+          orderSelect.disabled = savedOrders.length === 0;
+          orderStatus.textContent = savedOrders.length
+            ? `${savedOrders.length} saved order${savedOrders.length === 1 ? '' : 's'} available.`
+            : 'No saved orders are available.';
+        } catch (error) {
+          orderSelect.replaceChildren(new Option('Saved orders unavailable', ''));
+          orderSelect.disabled = true;
+          orderStatus.textContent = `Could not load saved orders: ${error.message}`;
+        }
+      }
+
+      orderSelect.addEventListener('change', () => {
+        openOrderButton.disabled = orderSelect.value === '';
+      });
+
+      openOrderButton.addEventListener('click', () => {
+        const order = savedOrders[Number(orderSelect.value)];
+        if (!order) return;
+
+        window.location.href = '/orderfiles/' + encodeURIComponent(order.fileName);
+      });
+
+      loadSavedOrders();
     </script>
   </body>
 </html>

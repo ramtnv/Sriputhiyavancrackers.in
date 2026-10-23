@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Product Catalog & Order System</title>
+<title>Plan your celebration — Sri Puthiyavan Crackers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- SheetJS library for Excel read/write -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
@@ -358,6 +359,208 @@
     .message-actions { justify-content: stretch; }
     .message-actions a, .message-actions button { flex: 1; text-align: center; }
   }
+
+  :root {
+    color-scheme: light;
+    --bg-1: #faf8f4;
+    --bg-2: #f4f0e8;
+    --bg-3: #f4f0e8;
+    --panel: #fffdfa;
+    --panel-strong: #fffdfa;
+    --panel-alt: #f4f0e8;
+    --primary: #bd5137;
+    --primary-2: #963b2b;
+    --primary-3: #d99c48;
+    --success: #277650;
+    --danger: #a6342d;
+    --warning: #966019;
+    --text: #24251f;
+    --muted: #686a64;
+    --line: rgba(24, 25, 22, 0.12);
+    --shadow: 0 18px 55px rgba(42, 35, 25, 0.08);
+  }
+
+  body {
+    padding: 34px 20px;
+    color: var(--text);
+    background: linear-gradient(145deg, #faf8f4, #f4f0e8);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .container {
+    max-width: 1120px;
+    padding: clamp(22px, 4vw, 48px);
+    border: 1px solid rgba(24, 25, 22, .09);
+    border-radius: 24px;
+    background: rgba(255, 253, 250, .92);
+    box-shadow: 0 24px 70px rgba(42, 35, 25, .09);
+    backdrop-filter: blur(16px);
+  }
+
+  .topbar {
+    align-items: flex-end;
+    margin-bottom: 34px;
+    padding: 0 0 22px;
+    border-bottom-color: var(--line);
+  }
+
+  .brand { display: block; }
+  .brand h1 { margin: 0; color: var(--text); font-family: Georgia, serif; font-weight: 400; }
+  .topbar::after {
+    align-self: center;
+    color: var(--muted);
+    content: "A brighter celebration starts here";
+    font-size: .88rem;
+  }
+
+  h2 {
+    padding-bottom: 12px;
+    border-bottom-color: var(--line);
+    color: var(--text);
+    font-family: Georgia, serif;
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-weight: 400;
+    letter-spacing: -.035em;
+  }
+
+  table {
+    border-color: var(--line);
+    background: #fffdfa;
+    box-shadow: none;
+  }
+
+  th, td { border-bottom-color: var(--line); color: var(--text); }
+  th { background: #f4f0e8; color: #686a64; font-size: .7rem; }
+  tbody tr:nth-child(even) { background: #fcfaf6; }
+  tbody tr:hover { background: rgba(189, 81, 55, .05); }
+
+  button {
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    box-shadow: 0 7px 18px rgba(189, 81, 55, .15);
+  }
+
+  button:hover { transform: translateY(-2px); filter: brightness(1.04); }
+  button.remove { background: #f5e9e5; color: #963b2b; box-shadow: none; }
+  button.checkout { min-height: 48px; padding: 13px 24px; }
+
+  input[type="number"], input[type="text"], input[type="tel"], textarea {
+    border-color: var(--line);
+    background: #fffdfa;
+    color: var(--text);
+  }
+
+  input[type="text"]:focus, input[type="tel"]:focus, textarea:focus, input[type="number"]:focus {
+    border-color: rgba(189, 81, 55, .6);
+    box-shadow: 0 0 0 4px rgba(189, 81, 55, .1);
+  }
+
+  .cart-summary, .user-form, .confirmation {
+    border-color: var(--line);
+    background: #fffdfa;
+    box-shadow: 0 10px 28px rgba(42, 35, 25, .035);
+  }
+
+  .user-form label { color: var(--text); }
+  .total { color: var(--primary-dark, #963b2b); }
+  .confirmation { background: #f1f8f3; border-color: rgba(39, 118, 80, .22); }
+  .confirmation h3 { color: #277650; }
+  .uid-display { border-color: rgba(39, 118, 80, .22); background: #fffdfa; color: #277650; }
+
+  .status.error { background: #fbefed; color: #842d27; border-color: #edd0ca; }
+  .status.info { background: #f1f5ed; color: #425438; border-color: #dce5d4; }
+
+  .message-overlay { background: rgba(30, 28, 24, .5); backdrop-filter: blur(6px); }
+  .message-box { border-color: var(--line); background: #fffdfa; box-shadow: 0 24px 60px rgba(24, 25, 22, .2); }
+  .message-header { background: linear-gradient(135deg, var(--primary), var(--primary-2)); }
+  .message-body { color: var(--text); }
+  .message-id { border-color: rgba(189, 81, 55, .22); background: #f7f0e9; color: var(--accent-dark, #963b2b); }
+  .message-actions button { background: #f1eee8; color: var(--text); }
+  .message-actions a { background: #277650; }
+
+  @media (max-width: 760px) {
+    body { padding: 16px 12px; }
+    .container { padding: 20px 15px; border-radius: 18px; }
+    .topbar { align-items: flex-start; gap: 8px; }
+    .topbar::after { font-size: .78rem; }
+    table {
+      display: block;
+      width: 100%;
+      margin-bottom: 22px;
+      overflow: visible;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+
+    tbody { display: grid; gap: 10px; }
+
+    tbody tr {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fffdfa;
+    }
+
+    tbody tr:nth-child(even),
+    tbody tr:hover { background: #fffdfa; }
+
+    td {
+      min-width: 0;
+      padding: 11px 12px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      font-size: .85rem;
+      overflow-wrap: anywhere;
+    }
+
+    td::before {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    #productsTable td:nth-child(1)::before { content: "Serial No."; }
+    #productsTable td:nth-child(2)::before { content: "Product"; }
+    #productsTable td:nth-child(3)::before { content: "Description"; }
+    #productsTable td:nth-child(4)::before { content: "Price (INR)"; }
+    #productsTable td:nth-child(5)::before { content: "Quantity"; }
+    #productsTable td:nth-child(6)::before { content: "Action"; }
+
+    #cartTable td:nth-child(1)::before { content: "Serial No."; }
+    #cartTable td:nth-child(2)::before { content: "Product"; }
+    #cartTable td:nth-child(3)::before { content: "Price (INR)"; }
+    #cartTable td:nth-child(4)::before { content: "Quantity"; }
+    #cartTable td:nth-child(5)::before { content: "Subtotal (INR)"; }
+    #cartTable td:nth-child(6)::before { content: "Action"; }
+
+    td[colspan] { grid-column: 1 / -1; border: 0; text-align: center; }
+    td[colspan]::before { content: none !important; }
+    td input[type="number"] { width: min(100%, 110px); min-width: 0; }
+    td button { max-width: 100%; padding: 10px 13px; white-space: normal; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
 </style>
 </head>
 <body>
@@ -365,10 +568,10 @@
 <div class="container">
     <header class="topbar">
       <div class="brand">
-        <h1>Product Catalog & Order System</h1>
+        <h1>Plan your celebration</h1>
       </div>
     </header>
-  <div id="statusBox"></div>
+  <div id="statusBox" aria-live="polite"></div>
 
   <!-- Products Table -->
   <h2>Available Products</h2>
@@ -413,13 +616,13 @@
   <div class="user-form">
     <h2>👤 Customer Details</h2>
     <label for="userName">Full Name:</label>
-    <input type="text" id="userName" placeholder="Enter your full name">
+    <input type="text" id="userName" placeholder="Enter your full name" autocomplete="name" maxlength="120">
     <label for="userAddress">Full Address:</label>
-    <textarea id="userAddress" rows="3" placeholder="Enter your full address"></textarea>
+    <textarea id="userAddress" rows="3" placeholder="Enter your full address" autocomplete="street-address" maxlength="1000"></textarea>
     <label for="userPhone">Phone Number:</label>
-    <input type="tel" id="userPhone" placeholder="e.g. +1 555 123 4567">
+    <input type="tel" id="userPhone" placeholder="e.g. +91 90033 57888" autocomplete="tel" maxlength="24">
     <br><br>
-    <button class="checkout" onclick="checkout()">✔ Confirm Order & Get Unique ID</button>
+    <button class="checkout" id="checkoutButton" type="button">✔ Confirm Order & Get Unique ID</button>
   </div>
 
   <!-- Confirmation -->
@@ -440,7 +643,7 @@
       <p>Please take a screenshot of this confirmation and send it to WhatsApp number <strong>9003357888</strong> for further reference.</p>
       <div class="message-actions">
         <a id="whatsappLink" href="#" target="_blank" rel="noopener noreferrer">Send on WhatsApp</a>
-        <button onclick="closeMessageBox()">Close</button>
+        <button id="closeMessageButton" type="button">Close</button>
       </div>
     </div>
   </div>
@@ -449,6 +652,21 @@
 <script>
   let products = [];
   let cart = []; // { serial, name, price, qty }
+
+  function appendCell(row, value, options = {}) {
+    const cell = document.createElement('td');
+    cell.textContent = String(value);
+    if (options.colSpan) cell.colSpan = options.colSpan;
+    row.appendChild(cell);
+    return cell;
+  }
+
+  function appendEmptyRow(tbody, message) {
+    const row = document.createElement('tr');
+    appendCell(row, message, { colSpan: 6 });
+    row.firstElementChild.style.textAlign = 'center';
+    tbody.replaceChildren(row);
+  }
 
   // ---------- Load products.xlsx ----------
   async function loadProducts() {
@@ -463,51 +681,78 @@
       if (json.length === 0) throw new Error('products.xlsx is empty');
 
       products = json.map(row => ({
-        serial: row['Product Serial Number'] ?? row['Serial Number'] ?? row['Serial'] ?? row['serial'] ?? '',
-        name:   row['Product Name'] ?? row['Name'] ?? row['name'] ?? '',
-        desc:   row['Product Description'] ?? row['Description'] ?? row['desc'] ?? '',
-        price:  parseFloat(row['Product Price'] ?? row['Price'] ?? row['price'] ?? 0)
-      }));
+        serial: String(row['Product Serial Number'] ?? row['Serial Number'] ?? row['Serial'] ?? row['serial'] ?? '').trim(),
+        name: String(row['Product Name'] ?? row['Name'] ?? row['name'] ?? '').trim(),
+        desc: String(row['Product Description'] ?? row['Description'] ?? row['desc'] ?? '').trim(),
+        price: Number.parseFloat(row['Product Price'] ?? row['Price'] ?? row['price'] ?? 0)
+      })).filter(product =>
+        product.serial !== '' &&
+        product.name !== '' &&
+        Number.isFinite(product.price) &&
+        product.price >= 0
+      );
+
+      if (products.length === 0) throw new Error('No valid products were found in products.xlsx.');
 
       renderProducts();
       showStatus('Products loaded successfully. Total: ' + products.length, 'info');
     } catch (err) {
-      document.getElementById('productsBody').innerHTML =
-        `<tr><td colspan="6" style="color:red;text-align:center;">
-          Error: ${err.message}<br>
-          Make sure <b>products.xlsx</b> exists in the same folder as this HTML file.
-        </td></tr>`;
-      showStatus('Error loading products.xlsx: ' + err.message, 'error');
+      appendEmptyRow(document.getElementById('productsBody'), `Unable to load products. ${err.message}`);
+      showStatus(`Error loading products.xlsx: ${err.message}`, 'error');
     }
   }
 
   function renderProducts() {
     const tbody = document.getElementById('productsBody');
-    tbody.innerHTML = '';
-    products.forEach(p => {
+    const fragment = document.createDocumentFragment();
+    products.forEach((p, index) => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${p.serial}</td>
-        <td>${p.name}</td>
-        <td>${p.desc}</td>
-        <td>${p.price.toFixed(2)}</td>
-        <td><input type="number" min="1" value="1" id="qty-${p.serial}"></td>
-        <td><button onclick="addToCart('${p.serial}')">Add to Cart</button></td>
-      `;
-      tbody.appendChild(tr);
+      appendCell(tr, p.serial);
+      appendCell(tr, p.name);
+      appendCell(tr, p.desc);
+      appendCell(tr, p.price.toFixed(2));
+      const quantityCell = document.createElement('td');
+      const quantityInput = document.createElement('input');
+      quantityInput.type = 'number';
+      quantityInput.min = '1';
+      quantityInput.max = '999';
+      quantityInput.value = '1';
+      quantityInput.id = `product-quantity-${index}`;
+      quantityInput.setAttribute('aria-label', `Quantity for ${p.name}`);
+      quantityCell.appendChild(quantityInput);
+      tr.appendChild(quantityCell);
+      const actionCell = document.createElement('td');
+      const addButton = document.createElement('button');
+      addButton.type = 'button';
+      addButton.textContent = 'Add to Cart';
+      addButton.addEventListener('click', () => addToCart(p.serial, quantityInput.value));
+      actionCell.appendChild(addButton);
+      tr.appendChild(actionCell);
+      fragment.appendChild(tr);
     });
+    tbody.replaceChildren(fragment);
   }
 
   // ---------- Cart operations ----------
-  function addToCart(serial) {
-    const qtyInput = document.getElementById('qty-' + serial);
-    const qty = parseInt(qtyInput.value);
-    if (!qty || qty < 1) { alert('Please enter a valid quantity'); return; }
+  function addToCart(serial, quantity) {
+    const qty = Number.parseInt(quantity, 10);
+    if (!Number.isInteger(qty) || qty < 1 || qty > 999) {
+      showStatus('Please enter a quantity between 1 and 999.', 'error');
+      return;
+    }
 
-    const product = products.find(p => p.serial == serial);
-    const existing = cart.find(c => c.serial == serial);
+    const product = products.find(p => p.serial === serial);
+    if (!product) {
+      showStatus('That product is no longer available. Please refresh the page.', 'error');
+      return;
+    }
+    const existing = cart.find(c => c.serial === serial);
 
     if (existing) {
+      if (existing.qty + qty > 999) {
+        showStatus('The maximum quantity per product is 999.', 'error');
+        return;
+      }
       existing.qty += qty;
     } else {
       cart.push({ serial: product.serial, name: product.name, price: product.price, qty: qty });
@@ -516,54 +761,66 @@
   }
 
   function removeFromCart(serial) {
-    cart = cart.filter(c => c.serial != serial);
+    cart = cart.filter(c => c.serial !== serial);
     renderCart();
   }
 
   function updateQty(serial, newQty) {
-    const item = cart.find(c => c.serial == serial);
+    const item = cart.find(c => c.serial === serial);
     if (item) {
-      item.qty = Math.max(1, parseInt(newQty) || 1);
+      const quantity = Number.parseInt(newQty, 10);
+      item.qty = Number.isInteger(quantity) ? Math.min(999, Math.max(1, quantity)) : 1;
       renderCart();
     }
   }
 
   function renderCart() {
     const tbody = document.getElementById('cartBody');
-    tbody.innerHTML = '';
     let total = 0;
     if (cart.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Cart is empty</td></tr>';
+      appendEmptyRow(tbody, 'Cart is empty');
     } else {
+      const fragment = document.createDocumentFragment();
       cart.forEach(c => {
         const sub = c.price * c.qty;
         total += sub;
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${c.serial}</td>
-          <td>${c.name}</td>
-          <td>${c.price.toFixed(2)}</td>
-          <td><input type="number" min="1" value="${c.qty}"
-               onchange="updateQty('${c.serial}', this.value)"></td>
-          <td>${sub.toFixed(2)}</td>
-          <td><button class="remove" onclick="removeFromCart('${c.serial}')">Remove</button></td>
-        `;
-        tbody.appendChild(tr);
+        appendCell(tr, c.serial);
+        appendCell(tr, c.name);
+        appendCell(tr, c.price.toFixed(2));
+        const quantityCell = document.createElement('td');
+        const quantityInput = document.createElement('input');
+        quantityInput.type = 'number';
+        quantityInput.min = '1';
+        quantityInput.max = '999';
+        quantityInput.value = String(c.qty);
+        quantityInput.setAttribute('aria-label', `Quantity for ${c.name}`);
+        quantityInput.addEventListener('change', () => updateQty(c.serial, quantityInput.value));
+        quantityCell.appendChild(quantityInput);
+        tr.appendChild(quantityCell);
+        appendCell(tr, sub.toFixed(2));
+        const actionCell = document.createElement('td');
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'remove';
+        removeButton.textContent = 'Remove';
+        removeButton.addEventListener('click', () => removeFromCart(c.serial));
+        actionCell.appendChild(removeButton);
+        tr.appendChild(actionCell);
+        fragment.appendChild(tr);
       });
+      tbody.replaceChildren(fragment);
     }
     document.getElementById('totalAmount').textContent = total.toFixed(2);
   }
 
   // ---------- Unique ID generator ----------
   function generateUniqueId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const prefix = 'UID';
-    const timestamp = Date.now().toString(36).toUpperCase();
-    let rand = '';
-    for (let i = 0; i < 5; i++) {
-      rand += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return prefix + '-' + timestamp + '-' + rand;
+    const randomPart = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map(value => value.toString(16).padStart(2, '0'))
+      .join('')
+      .toUpperCase();
+    return `UID-${randomPart}`;
   }
 
   function showOrderMessageBox(uniqueId) {
@@ -618,15 +875,18 @@
 
   // ---------- Checkout ----------
   async function checkout() {
-    if (cart.length === 0) { alert('Your cart is empty!'); return; }
+    if (cart.length === 0) {
+      showStatus('Your cart is empty. Add a product before placing your order.', 'error');
+      return;
+    }
 
     const name    = document.getElementById('userName').value.trim();
     const address = document.getElementById('userAddress').value.trim();
     const phone   = document.getElementById('userPhone').value.trim();
 
-    if (!name)    { alert('Please enter your full name'); return; }
-    if (!address) { alert('Please enter your address'); return; }
-    if (!phone)   { alert('Please enter your phone number'); return; }
+    if (!name || name.length > 120) { showStatus('Please enter your name (up to 120 characters).', 'error'); return; }
+    if (!address || address.length > 1000) { showStatus('Please enter your address (up to 1,000 characters).', 'error'); return; }
+    if (!/^[+()\d\s-]{7,24}$/.test(phone)) { showStatus('Please enter a valid phone number.', 'error'); return; }
 
     const uniqueId = generateUniqueId();
 
@@ -644,6 +904,8 @@
     XLSX.utils.book_append_sheet(wb, ws, 'Orders');
     const fileName = `${uniqueId}.xlsx`;
     const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const checkoutButton = document.getElementById('checkoutButton');
+    checkoutButton.disabled = true;
 
     try {
       const result = await saveOrderRequest({
@@ -658,14 +920,22 @@
       showStatus('Order placed! Your Unique ID: ' + uniqueId, 'info');
     } catch (err) {
       showStatus('Could not save order file: ' + err.message, 'error');
-      alert('Could not save order file. Please contact support.');
+    } finally {
+      checkoutButton.disabled = false;
     }
   }
+
+  document.getElementById('checkoutButton').addEventListener('click', checkout);
+  document.getElementById('closeMessageButton').addEventListener('click', closeMessageBox);
 
   // ---------- Status helper ----------
   function showStatus(msg, type) {
     const box = document.getElementById('statusBox');
-    box.innerHTML = `<div class="status ${type}">${msg}</div>`;
+    const status = document.createElement('div');
+    status.className = `status ${type === 'error' ? 'error' : 'info'}`;
+    status.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    status.textContent = msg;
+    box.replaceChildren(status);
   }
 
   // Init

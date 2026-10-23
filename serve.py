@@ -1,6 +1,9 @@
 import json
 import os
+import posixpath
 import re
+import xml.etree.ElementTree as ET
+import zipfile
 from cgi import FieldStorage
 from datetime import datetime
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
@@ -43,6 +46,62 @@ def get_next_invoice_number(year=None):
 
     next_number = highest + 1
     return f'SPC{next_number:05d}'
+
+
+def get_order_display_name(file_path):
+    main_ns = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
+    relationship_ns = '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
+    package_relationship_ns = '{http://schemas.openxmlformats.org/package/2006/relationships}'
+
+    with zipfile.ZipFile(file_path) as workbook:
+        workbook_root = ET.fromstring(workbook.read('xl/workbook.xml'))
+        first_sheet = workbook_root.find(f'{main_ns}sheets/{main_ns}sheet')
+        if first_sheet is None:
+            raise ValueError('Workbook contains no worksheets.')
+
+        relationship_id = first_sheet.get(f'{relationship_ns}id')
+        relationships_root = ET.fromstring(workbook.read('xl/_rels/workbook.xml.rels'))
+        worksheet_target = next(
+            (
+                relationship.get('Target')
+                for relationship in relationships_root.findall(f'{package_relationship_ns}Relationship')
+                if relationship.get('Id') == relationship_id
+            ),
+            None
+        )
+        if not worksheet_target:
+            raise ValueError('Workbook worksheet could not be located.')
+
+        worksheet_path = (
+            worksheet_target.lstrip('/')
+            if worksheet_target.startswith('/')
+            else posixpath.normpath(posixpath.join('xl', worksheet_target))
+        )
+        worksheet_root = ET.fromstring(workbook.read(worksheet_path))
+        cell = next(
+            (
+                candidate
+                for candidate in worksheet_root.iter(f'{main_ns}c')
+                if candidate.get('r') == 'D2'
+            ),
+            None
+        )
+        if cell is None:
+            return ''
+
+        if cell.get('t') == 'inlineStr':
+            return ''.join(text.text or '' for text in cell.iter(f'{main_ns}t')).strip()
+
+        value = cell.find(f'{main_ns}v')
+        if value is None or value.text is None:
+            return ''
+
+        if cell.get('t') == 's':
+            shared_strings_root = ET.fromstring(workbook.read('xl/sharedStrings.xml'))
+            shared_strings = shared_strings_root.findall(f'{main_ns}si')
+            return ''.join(text.text or '' for text in shared_strings[int(value.text)].iter(f'{main_ns}t')).strip()
+
+        return value.text.strip()
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -109,7 +168,8 @@ class Handler(SimpleHTTPRequestHandler):
             return False, f'Upload failed: {exc}', 500
 
     def do_GET(self):
-        if self.path == '/api/invoice/next-number':
+        request_path = urlparse(self.path).path
+        if request_path == '/api/invoice/next-number':
             year = datetime.now().year
             invoice_no = get_next_invoice_number(year)
             self.send_response(200)
@@ -122,10 +182,32 @@ class Handler(SimpleHTTPRequestHandler):
             }).encode('utf-8'))
             return
 
-        self.send_response(404)
-        self.send_header('Content-Type', 'application/json')
-        self.end_headers()
-        self.wfile.write(json.dumps({'success': False, 'message': 'Not found'}).encode('utf-8'))
+        if request_path in ('/api/orders', '/api/orders.php'):
+            try:
+                orders = [
+                    {
+                        'fileName': file_path.name,
+                        'name': get_order_display_name(file_path)
+                    }
+                    for file_path in sorted(ORDER_DIR.iterdir(), key=lambda path: path.name.casefold())
+                    if file_path.is_file() and file_path.suffix.lower() == '.xlsx'
+                ]
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'orders': orders}).encode('utf-8'))
+            except (OSError, ValueError, zipfile.BadZipFile, ET.ParseError, KeyError, IndexError) as exc:
+                print(f'Unable to list order files: {exc}')
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': False,
+                    'message': 'Unable to read the order files.'
+                }).encode('utf-8'))
+            return
+
+        super().do_GET()
 
     def do_POST(self):
         if self.path in ('/api/invoice/save-pdf', '/save-invoice'):

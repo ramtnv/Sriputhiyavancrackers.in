@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Product Catalog & Order System</title>
 <!-- SheetJS library for Excel read/write -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -51,6 +52,79 @@
   .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
   .status.error { background: #f8d7da; color: #721c24; }
   .status.info  { background: #d1ecf1; color: #0c5460; }
+
+  @media (max-width: 700px) {
+    html { overflow-x: clip; }
+    body { padding: 12px; overflow-x: clip; }
+    .container { width: 100%; min-width: 0; }
+    h1 { font-size: clamp(1.45rem, 7vw, 2rem); overflow-wrap: anywhere; }
+
+    table {
+      display: block;
+      width: 100%;
+      overflow: visible;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+
+    tbody { display: grid; gap: 10px; }
+    tbody tr {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    td {
+      min-width: 0;
+      padding: 10px;
+      border: 0;
+      border-bottom: 1px solid #e0e0e0;
+      overflow-wrap: anywhere;
+    }
+
+    td::before {
+      display: block;
+      margin-bottom: 5px;
+      color: #66717d;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    #productsTable td:nth-child(1)::before { content: "Serial No."; }
+    #productsTable td:nth-child(2)::before { content: "Product"; }
+    #productsTable td:nth-child(3)::before { content: "Description"; }
+    #productsTable td:nth-child(4)::before { content: "Price"; }
+    #productsTable td:nth-child(5)::before { content: "Quantity"; }
+    #productsTable td:nth-child(6)::before { content: "Action"; }
+
+    #cartTable td:nth-child(1)::before { content: "Serial No."; }
+    #cartTable td:nth-child(2)::before { content: "Product"; }
+    #cartTable td:nth-child(3)::before { content: "Price"; }
+    #cartTable td:nth-child(4)::before { content: "Quantity"; }
+    #cartTable td:nth-child(5)::before { content: "Subtotal"; }
+    #cartTable td:nth-child(6)::before { content: "Action"; }
+
+    td[colspan] { grid-column: 1 / -1; text-align: center; }
+    td[colspan]::before { content: none !important; }
+    td input[type="number"] { width: min(100%, 110px); }
+    td button { max-width: 100%; white-space: normal; }
+  }
 </style>
 </head>
 <body>
