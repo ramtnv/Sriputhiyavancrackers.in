@@ -149,6 +149,7 @@ foreach (scandir($ordersDirectory) as $fileName) {
         $orders[] = [
             'fileName' => $fileName,
             'name' => getOrderName($filePath),
+            'lastModified' => date(DATE_ATOM, filemtime($filePath)),
         ];
     } catch (Throwable $error) {
         error_log('Unable to read order workbook ' . $fileName . ': ' . $error->getMessage());

@@ -252,10 +252,23 @@
           const result = await response.json();
           if (!Array.isArray(result.orders)) throw new Error('Invalid order list response.');
 
-          savedOrders = result.orders;
+          savedOrders = result.orders.slice().sort((left, right) => {
+            const leftModified = Date.parse(left.lastModified);
+            const rightModified = Date.parse(right.lastModified);
+            return (Number.isNaN(rightModified) ? 0 : rightModified)
+              - (Number.isNaN(leftModified) ? 0 : leftModified);
+          });
           orderSelect.replaceChildren(new Option('Choose a saved order', ''));
           savedOrders.forEach((order, index) => {
-            orderSelect.add(new Option(order.name, String(index)));
+            const modifiedDate = Date.parse(order.lastModified);
+            const dateLabel = Number.isNaN(modifiedDate)
+              ? 'Unknown date'
+              : new Intl.DateTimeFormat('en-IN', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric'
+                }).format(modifiedDate);
+            orderSelect.add(new Option(`${order.name} (${dateLabel})`, String(index)));
           });
           orderSelect.disabled = savedOrders.length === 0;
           orderStatus.textContent = savedOrders.length

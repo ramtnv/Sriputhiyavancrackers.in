@@ -187,9 +187,12 @@ class Handler(SimpleHTTPRequestHandler):
                 orders = [
                     {
                         'fileName': file_path.name,
-                        'name': get_order_display_name(file_path)
+                        'name': get_order_display_name(file_path),
+                        'lastModified': datetime.fromtimestamp(
+                            file_path.stat().st_mtime
+                        ).astimezone().isoformat(timespec='seconds'),
                     }
-                    for file_path in sorted(ORDER_DIR.iterdir(), key=lambda path: path.name.casefold())
+                    for file_path in ORDER_DIR.iterdir()
                     if file_path.is_file() and file_path.suffix.lower() == '.xlsx'
                 ]
                 self.send_response(200)
