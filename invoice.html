@@ -3,597 +3,1094 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Invoice</title>
+  <title>Tax Invoice - Sri Puthiyavan Crackers</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <style>
     :root {
       --primary: #0f172a;
+      --primary-light: #1e293b;
+      --accent: #b91c1c;
+      --accent-hover: #991b1b;
+      --accent-blue: #2563eb;
       --muted: #64748b;
-      --light: #f8fafc;
-      --line: #dfe7f1;
-      --accent: #2563eb;
+      --light-muted: #94a3b8;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --line: #e2e8f0;
+      --line-dark: #cbd5e1;
       --danger: #dc2626;
       --success: #16a34a;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 20px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 12px 35px rgba(15, 23, 42, 0.12);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #eef2f7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
       color: var(--primary);
+      -webkit-font-smoothing: antialiased;
     }
 
-    .page {
-      max-width: 1100px;
-      margin: 24px auto;
-      background: white;
-      border: 1px solid var(--line);
-      box-shadow: 0 10px 35px rgba(15, 23, 42, 0.08);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-
-    .header {
+    /* Screen-only navigation bar */
+    .screen-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #0f172a;
+      color: white;
+      padding: 12px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 24px 28px;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
+      gap: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
     }
 
-    .company h1 {
-      font-size: 28px;
-      margin: 0 0 4px;
-      letter-spacing: 0.04em;
-    }
-
-    .company p,
-    .meta p {
-      margin: 2px 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .meta {
-      text-align: right;
-    }
-
-    .meta .badge {
-      display: inline-block;
-      background: var(--primary);
-      color: white;
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       font-weight: 700;
-      letter-spacing: 0.08em;
-      border-radius: 999px;
-      padding: 8px 14px;
-      margin-bottom: 8px;
-      font-size: 12px;
+      font-size: 15px;
+      letter-spacing: 0.05em;
     }
 
-    .content {
-      padding: 28px;
+    .topbar-brand a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+      transition: all 0.2s;
     }
 
-    .top-grid,
-    .totals-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 20px;
+    .topbar-brand a:hover {
+      color: white;
+      background: rgba(255,255,255,0.18);
     }
 
-    .box {
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Main Invoice Wrapper */
+    .page-container {
+      max-width: 1060px;
+      margin: 24px auto 48px;
+      padding: 0 16px;
+    }
+
+    /* Collapsible Product Selector */
+    .products-panel {
+      margin-bottom: 24px;
+      background: var(--card-bg);
       border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 18px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .panel-header {
+      padding: 14px 20px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-filter-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      max-width: 480px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--line-dark);
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
       background: #fff;
     }
 
-    .box h3 {
-      margin: 0 0 14px;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
+    .search-input:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
-    .field-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px 18px;
-      margin-top: 10px;
+    .products-table-wrapper {
+      max-height: 280px;
+      overflow-y: auto;
     }
 
-    .field {
+    /* Invoice Page Card (Printable Document) */
+    .invoice-card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      padding: 40px;
+    }
+
+    /* Header */
+    .invoice-header {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid var(--line);
     }
 
-    .field label {
+    .company-identity {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .company-logo {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      padding: 2px;
+      background: #fff;
+    }
+
+    .company-info h1 {
+      margin: 0 0 4px;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.01em;
+    }
+
+    .company-tagline {
+      margin: 0 0 6px;
       font-size: 12px;
-      color: var(--muted);
-      font-weight: 700;
+      font-weight: 600;
+      color: var(--accent);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
-    .field input,
-    .field textarea,
-    .field select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      font-size: 14px;
-      background: #fff;
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .field input:focus,
-    .field textarea:focus,
-    .field select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 110px;
-    }
-
-    .products-panel {
-      margin-top: 26px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      overflow: hidden;
-      background: #fff;
-    }
-
-    .products-panel h3,
-    .items h3 {
-      margin: 0;
-      padding: 16px 18px 12px;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+    .company-details p {
+      margin: 2px 0;
+      font-size: 12.5px;
       color: var(--muted);
-      border-bottom: 1px solid var(--line);
-      background: #f8fafc;
+      line-height: 1.45;
     }
 
-    .items {
-      margin-top: 26px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-    }
-
-    thead th {
-      background: #f8fafc;
-      color: var(--muted);
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 12px 10px;
-      text-align: left;
-      border-bottom: 1px solid var(--line);
-    }
-
-    tbody td {
-      border-bottom: 1px solid var(--line);
-      padding: 10px;
-      vertical-align: top;
-    }
-
-    tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    .small {
-      width: 70px;
-    }
-
-    .align-right {
+    .invoice-badge-block {
       text-align: right;
     }
 
-    .totals {
-      margin-top: 20px;
-      display: flex;
-      justify-content: flex-end;
+    .invoice-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 6px;
+      margin-bottom: 12px;
     }
 
-    .totals-box {
-      width: min(350px, 100%);
+    .meta-list {
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 6px 14px;
+      font-size: 13px;
+      text-align: right;
+    }
+
+    .meta-list .meta-label {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .meta-list .meta-value {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* Billing & Details 2-Column Grid */
+    .billing-section {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 20px;
+      margin: 24px 0 28px;
+    }
+
+    .info-card {
       border: 1px solid var(--line);
       border-radius: 10px;
-      padding: 18px;
-      background: #fbfdff;
+      padding: 16px 18px;
+      background: #fafbfc;
+    }
+
+    .info-card-title {
+      margin: 0 0 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 6px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 14px;
+    }
+
+    .field-full {
+      grid-column: 1 / -1;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-field label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      padding: 8px 10px;
+      border: 1px solid var(--line-dark);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--primary);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-field textarea {
+      resize: vertical;
+      min-height: 52px;
+      line-height: 1.4;
+    }
+
+    /* Print text mirroring (hidden on screen, shown in print) */
+    .print-val {
+      display: none;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 10px 12px;
+      text-align: left;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+      color: var(--primary);
+    }
+
+    .order-table-container {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .order-table th {
+      background: #0f172a;
+      color: #ffffff;
+      border: none;
+      padding: 11px 12px;
+    }
+
+    .order-table tbody tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    .order-table tbody tr:hover {
+      background-color: #f1f5f9;
+    }
+
+    .col-sno {
+      width: 48px;
+      text-align: center;
+    }
+
+    .col-qty {
+      width: 85px;
+      text-align: center;
+    }
+
+    .col-price {
+      width: 120px;
+      text-align: right;
+    }
+
+    .col-amount {
+      width: 135px;
+      text-align: right;
+      font-weight: 700;
+    }
+
+    .col-action {
+      width: 50px;
+      text-align: center;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    /* Inline Table Inputs */
+    .table-input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid var(--line-dark);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      background: #fff;
+      text-align: center;
+    }
+
+    .table-input.price-input {
+      text-align: right;
+    }
+
+    /* Summary & Commercial Details Section */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      margin-top: 20px;
+      align-items: start;
+    }
+
+    .notes-terms-box {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .amount-words-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #f8fafc;
+    }
+
+    .amount-words-card .label {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .amount-words-card .words {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.4;
+    }
+
+    .terms-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fff;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .terms-box strong {
+      color: var(--primary);
+    }
+
+    /* Totals Box */
+    .totals-card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fafbfc;
+      padding: 16px 20px;
     }
 
     .totals-row {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
+      align-items: center;
       padding: 8px 0;
+      font-size: 13.5px;
+      color: #475569;
+    }
+
+    .totals-row strong {
+      color: var(--primary);
       font-size: 14px;
     }
 
-    .totals-row.total {
-      margin-top: 8px;
-      padding-top: 12px;
-      border-top: 1px solid var(--line);
+    .tax-select {
+      padding: 3px 6px;
+      border: 1px solid var(--line-dark);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--primary);
+      background: #fff;
+    }
+
+    .totals-row.grand-total {
+      margin-top: 10px;
+      padding: 14px 16px;
+      background: #0f172a;
+      color: #ffffff;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    .totals-row.grand-total strong {
+      color: #ffffff;
+      font-size: 19px;
+    }
+
+    .signature-area {
+      margin-top: 24px;
+      text-align: center;
+      padding-top: 16px;
+    }
+
+    .sign-company {
+      font-size: 11.5px;
       font-weight: 700;
-      font-size: 18px;
+      color: var(--primary);
+      text-transform: uppercase;
+      margin-bottom: 40px;
     }
 
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 22px;
+    .sign-line {
+      width: 180px;
+      height: 1px;
+      background: #94a3b8;
+      margin: 0 auto 6px;
     }
 
-    button {
+    .sign-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .invoice-footer-note {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    /* Buttons */
+    .btn {
       appearance: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
       border: none;
-      border-radius: 10px;
-      padding: 12px 20px;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.15s ease, opacity 0.2s ease;
+      transition: all 0.15s ease;
+      text-decoration: none;
     }
 
-    button:hover { transform: translateY(-1px); }
-    button:active { transform: translateY(0); }
-
-    .primary {
-      background: var(--primary);
-      color: white;
+    .btn:hover {
+      transform: translateY(-1px);
     }
 
-    .secondary {
-      background: #e2e8f0;
-      color: var(--primary);
+    .btn:active {
+      transform: translateY(0);
     }
 
-    .status {
-      margin-top: 18px;
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: #334155;
+      color: #ffffff;
+    }
+
+    .btn-secondary:hover {
+      background: #1e293b;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #475569;
+      color: #f1f5f9;
+    }
+
+    .btn-outline:hover {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    .btn-delete {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.15s;
+    }
+
+    .btn-delete:hover {
+      background: #b91c1c;
+      color: #fff;
+    }
+
+    .status-msg {
+      padding: 8px 16px;
+      font-size: 13px;
       font-weight: 600;
-      min-height: 20px;
-      color: var(--success);
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.1);
+      border-radius: 6px;
+      display: none;
     }
 
-    .status.error {
-      color: var(--danger);
+    .status-msg.show {
+      display: inline-block;
     }
 
-    .hidden {
+    .status-msg.error {
+      color: #f87171;
+      background: rgba(248, 113, 113, 0.15);
+    }
+
+    .status-msg.success {
+      color: #4ade80;
+      background: rgba(74, 222, 128, 0.15);
+    }
+
+    /* Print-Only / Screen-Only helpers */
+    .print-only {
       display: none !important;
     }
 
+    /* ========================================================= */
+    /* STRICT PRINT MEDIA STYLES - ZERO PRODUCT DUPLICATION     */
+    /* ========================================================= */
     @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm 10mm 12mm 10mm;
+      }
+
       body {
-        background: #fff;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-size: 11pt;
       }
 
-      .page {
-        max-width: none;
-        margin: 0;
-        box-shadow: none;
-        border: none;
-        border-radius: 0;
-      }
-
+      .screen-topbar,
       .products-panel,
-      .actions,
-      #statusMessage {
+      .screen-only,
+      .col-action,
+      .btn-delete,
+      #statusMessage,
+      button {
         display: none !important;
+      }
+
+      .print-only {
+        display: inline-block !important;
+      }
+
+      .page-container {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .invoice-card {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+      }
+
+      .invoice-header {
+        padding-bottom: 12px !important;
+        border-bottom: 2px solid #0f172a !important;
+      }
+
+      .company-logo {
+        width: 60px !important;
+        height: 60px !important;
+        border: none !important;
+      }
+
+      .company-info h1 {
+        font-size: 20pt !important;
+      }
+
+      .invoice-badge {
+        background: #0f172a !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .billing-section {
+        margin: 16px 0 !important;
+        gap: 16px !important;
+      }
+
+      .info-card {
+        border: 1px solid #cbd5e1 !important;
+        background: #f8fafc !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      /* Clean borderless input presentation in print */
+      .form-field input,
+      .form-field select,
+      .form-field textarea {
+        display: none !important;
+      }
+
+      .print-val {
+        display: block !important;
+        font-size: 10pt;
+        font-weight: 600;
+        color: #0f172a;
+        margin-top: 2px;
+      }
+
+      /* Strict table page breaking rules */
+      .order-table-container {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
+      }
+
+      table.order-table {
+        page-break-inside: auto !important;
+        border-collapse: collapse !important;
+        width: 100% !important;
+      }
+
+      table.order-table thead {
+        display: table-header-group !important; /* Repeats table header cleanly on every printed page */
+      }
+
+      table.order-table tr {
+        page-break-inside: avoid !important;   /* PREVENTS ROW CUTTING OR MULTI-PAGE DUPLICATION */
+        break-inside: avoid !important;
+      }
+
+      table.order-table th {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        padding: 8px 10px !important;
+        font-size: 9pt !important;
+      }
+
+      table.order-table td {
+        padding: 7px 10px !important;
+        font-size: 9.5pt !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+      }
+
+      table.order-table tbody tr:nth-child(even) {
+        background-color: #f8fafc !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .summary-grid,
+      .signature-area {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      .totals-row.grand-total {
+        background: #0f172a !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
     }
 
-    @media (max-width: 760px) {
-      .page {
-        width: calc(100% - 24px);
-        min-width: 0;
-        margin: 12px auto;
-      }
-
-      .header,
-      .content,
-      .box,
-      .products-panel,
-      .items {
-        min-width: 0;
-      }
-
-      .content {
-        padding: 16px;
-      }
-
-      .top-grid,
-      .field-row,
-      .totals-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .field-row > .field[style] {
-        grid-column: auto !important;
-      }
-
-      .header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+    /* Responsive Screen Styles */
+    @media (max-width: 820px) {
+      .invoice-card {
         padding: 20px;
       }
 
-      .company h1 {
-        font-size: clamp(22px, 7vw, 28px);
-        overflow-wrap: anywhere;
+      .invoice-header {
+        flex-direction: column;
+        align-items: flex-start;
       }
 
-      .meta {
+      .invoice-badge-block {
         text-align: left;
       }
 
-      .products-panel,
-      .items {
-        overflow: visible;
+      .meta-list {
+        text-align: left;
       }
 
-      table {
-        display: block;
-        width: 100%;
-        min-width: 0;
-        overflow: visible;
+      .billing-section,
+      .summary-grid {
+        grid-template-columns: 1fr;
       }
 
-      thead {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        clip-path: inset(50%);
-      }
-
-      tbody {
-        display: grid;
-        gap: 10px;
-      }
-
-      tbody tr {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        min-width: 0;
-        overflow: hidden;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: #fff;
-      }
-
-      tbody td {
-        min-width: 0;
-        padding: 9px 10px;
-        overflow-wrap: anywhere;
-        border-bottom: 1px solid var(--line);
-      }
-
-      tbody td::before {
-        display: block;
-        margin-bottom: 4px;
-        color: var(--muted);
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-      }
-
-      #productsTableBody td:nth-child(1)::before { content: "S.No"; }
-      #productsTableBody td:nth-child(2)::before { content: "Product"; }
-      #productsTableBody td:nth-child(3)::before { content: "Description"; }
-      #productsTableBody td:nth-child(4)::before { content: "Price"; }
-      #productsTableBody td:nth-child(5)::before { content: "Quantity"; }
-      #productsTableBody td:nth-child(6)::before { content: "Action"; }
-
-      #productsTableBody td:nth-child(2),
-      #productsTableBody td:nth-child(3) {
-        grid-column: 1 / -1;
-      }
-
-      #orderTableBody td:nth-child(1)::before { content: "#"; }
-      #orderTableBody td:nth-child(2)::before { content: "Item"; }
-      #orderTableBody td:nth-child(3)::before { content: "Quantity"; }
-      #orderTableBody td:nth-child(4)::before { content: "Rate"; }
-      #orderTableBody td:nth-child(5)::before { content: "Amount"; }
-
-      td[colspan] {
-        grid-column: 1 / -1;
-        text-align: center;
-      }
-
-      td[colspan]::before {
-        content: none !important;
-      }
-
-      tbody input[type="number"] {
-        width: 100%;
-        min-width: 0;
-      }
-
-      tbody button {
-        max-width: 100%;
-        padding: 9px 10px;
-        overflow-wrap: anywhere;
-      }
-
-      .totals-box {
-        padding: 14px;
-      }
-
-      .actions {
+      .screen-topbar {
         flex-direction: column;
+        align-items: stretch;
       }
 
-      button {
-        width: 100%;
-      }
-
-      .status {
-        overflow-wrap: anywhere;
+      .topbar-actions {
+        justify-content: flex-end;
       }
     }
   </style>
 </head>
 <body>
-  <div class="page" id="invoicePage">
-    <div class="header">
-      <div class="company">
-        <h1>Sri Pudhiyavan</h1>
-        <p>Tax Invoice / Commercial Invoice</p>
-      </div>
-      <div class="meta">
-        <div class="badge">INVOICE</div>
-        <p>Invoice No: <strong id="invoiceNoDisplay">SPC00001</strong></p>
-        <p id="invoiceDateDisplay">Date: --</p>
-      </div>
+
+  <!-- Screen Top Navigation & Actions Bar -->
+  <header class="screen-topbar">
+    <div class="topbar-brand">
+      <span>Sri Puthiyavan Crackers • Invoice Portal</span>
+      <a href="mano.html">← Back to Portal</a>
+      <a href="index.html">Home</a>
     </div>
+    <div class="topbar-actions">
+      <div id="statusMessage" class="status-msg" aria-live="polite"></div>
+      <button type="button" class="btn btn-outline btn-sm" id="toggleCatalogBtn">📦 Toggle Catalog</button>
+      <button type="button" class="btn btn-secondary" id="printBtn">🖨️ Print Invoice</button>
+      <button type="button" class="btn btn-primary" id="savePdfBtn">📄 Save as PDF</button>
+    </div>
+  </header>
 
-    <div class="content">
-      <div class="top-grid">
-        <div class="box">
-          <h3>Bill To</h3>
-          <div class="field-row">
-            <div class="field">
-              <label for="customerName">Customer Name</label>
-              <input id="customerName" value="" />
-            </div>
-            <div class="field">
-              <label for="customerPhone">Phone</label>
-              <input id="customerPhone" value="" />
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="customerAddress">Address</label>
-              <textarea id="customerAddress"></textarea>
-            </div>
-          </div>
-        </div>
+  <main class="page-container">
 
-        <div class="box">
-          <h3>Invoice Details</h3>
-          <div class="field-row">
-            <div class="field">
-              <label for="invoiceNo">Invoice No</label>
-              <input id="invoiceNo" value="SPC00001" />
-            </div>
-            <div class="field">
-              <label for="invoiceDate">Date</label>
-              <input id="invoiceDate" type="date" />
-            </div>
-            <div class="field">
-              <label for="dueDate">Due Date</label>
-              <input id="dueDate" type="date" />
-            </div>
-            <div class="field">
-              <label for="paymentMode">Payment Mode</label>
-              <select id="paymentMode">
-                <option>Cash</option>
-                <option>UPI</option>
-                <option>Bank Transfer</option>
-                <option>Credit</option>
-              </select>
-            </div>
-          </div>
+    <!-- Available Products Panel (Screen-only catalog drawer) -->
+    <section class="products-panel screen-only" id="productsPanel">
+      <div class="panel-header">
+        <h2>📦 Available Products Catalog <span id="productCountBadge" style="font-size:12px; font-weight:normal; color:#64748b;">(Loading...)</span></h2>
+        <div class="search-filter-box">
+          <input type="text" id="productSearchInput" class="search-input" placeholder="🔍 Search by cracker name, code, description..." />
         </div>
       </div>
-
-      <div class="products-panel">
-        <h3>Available Products</h3>
+      <div class="products-table-wrapper">
         <table>
           <thead>
             <tr>
               <th style="width: 70px;">S.No</th>
               <th>Product Name</th>
-              <th style="width: 110px;">Description</th>
-              <th style="width: 100px;">Price</th>
-              <th style="width: 80px;">Qty</th>
-              <th style="width: 80px;">Action</th>
+              <th>Description</th>
+              <th style="width: 110px;" class="right">Price</th>
+              <th style="width: 90px;" class="center">Qty</th>
+              <th style="width: 90px;" class="center">Action</th>
             </tr>
           </thead>
           <tbody id="productsTableBody">
-            <tr><td colspan="6" style="text-align:center;">Loading products...</td></tr>
+            <tr><td colspan="6" style="text-align:center; padding: 24px;">Loading products from catalog...</td></tr>
           </tbody>
         </table>
       </div>
+    </section>
 
-      <div class="items">
-        <h3>Order Details</h3>
-        <table>
+    <!-- INVOICE DOCUMENT CARD -->
+    <article class="invoice-card" id="invoicePage">
+      
+      <!-- Company Branding Header -->
+      <header class="invoice-header">
+        <div class="company-identity">
+          <img src="Logo.png" alt="Sri Puthiyavan Crackers Logo" id="companyLogo" class="company-logo" />
+          <div class="company-info">
+            <h1>Sri Puthiyavan Crackers</h1>
+            <p class="company-tagline">Direct Sivakasi Manufacturer • Made for Brighter Celebrations</p>
+            <div class="company-details">
+              <p>📍 12, Market Road, Sivakasi, Tamil Nadu - 626123, India</p>
+              <p>📞 Phone / WhatsApp: +91 90033 57888 / +91 96775 39254</p>
+              <p>✉️ Email: sriputhiyavan@gmail.com &nbsp;|&nbsp; 📸 Instagram: @Sri_puthiyavan</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="invoice-badge-block">
+          <div class="invoice-badge">TAX INVOICE</div>
+          <div class="meta-list">
+            <span class="meta-label">Invoice No:</span>
+            <span class="meta-value" id="invoiceNoDisplay">SPC00001</span>
+            
+            <span class="meta-label">Invoice Date:</span>
+            <span class="meta-value" id="invoiceDateDisplay">--</span>
+
+            <span class="meta-label">Due Date:</span>
+            <span class="meta-value" id="dueDateDisplay">--</span>
+
+            <span class="meta-label">Payment Mode:</span>
+            <span class="meta-value" id="paymentModeDisplay">Cash</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Customer & Invoice Metadata Grid -->
+      <section class="billing-section">
+        <!-- Bill To -->
+        <div class="info-card">
+          <div class="info-card-title">Billed To (Customer Details)</div>
+          <div class="field-grid">
+            <div class="form-field">
+              <label for="customerName">Customer Name</label>
+              <input type="text" id="customerName" placeholder="Enter customer name" />
+              <span class="print-val" id="customerNamePrint">-</span>
+            </div>
+            <div class="form-field">
+              <label for="customerPhone">Phone Number</label>
+              <input type="tel" id="customerPhone" placeholder="+91 98765 43210" />
+              <span class="print-val" id="customerPhonePrint">-</span>
+            </div>
+            <div class="form-field field-full">
+              <label for="customerAddress">Delivery / Billing Address</label>
+              <textarea id="customerAddress" placeholder="Street address, City, District, PIN code"></textarea>
+              <span class="print-val" id="customerAddressPrint">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoice Meta Details -->
+        <div class="info-card">
+          <div class="info-card-title">Invoice & Payment Terms</div>
+          <div class="field-grid">
+            <div class="form-field">
+              <label for="invoiceNo">Invoice Number</label>
+              <input type="text" id="invoiceNo" value="SPC00001" />
+              <span class="print-val" id="invoiceNoPrint">SPC00001</span>
+            </div>
+            <div class="form-field">
+              <label for="invoiceDate">Invoice Date</label>
+              <input type="date" id="invoiceDate" />
+              <span class="print-val" id="invoiceDatePrint">--</span>
+            </div>
+            <div class="form-field">
+              <label for="dueDate">Payment Due Date</label>
+              <input type="date" id="dueDate" />
+              <span class="print-val" id="dueDatePrint">--</span>
+            </div>
+            <div class="form-field">
+              <label for="paymentMode">Payment Mode</label>
+              <select id="paymentMode">
+                <option value="Cash">Cash</option>
+                <option value="UPI / GPay">UPI / GPay / PhonePe</option>
+                <option value="Bank Transfer">Bank Transfer (NEFT/IMPS)</option>
+                <option value="Credit">Credit (15 Days)</option>
+              </select>
+              <span class="print-val" id="paymentModePrint">Cash</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Order Details Items Table -->
+      <section class="order-table-container">
+        <table class="order-table" id="mainOrderTable">
           <thead>
             <tr>
-              <th style="width:45px;">#</th>
+              <th class="col-sno">#</th>
               <th>Item Description</th>
-              <th class="small">Qty</th>
-              <th class="small">Rate</th>
-              <th class="small">Amount</th>
+              <th class="col-qty">Qty</th>
+              <th class="col-price">Rate (₹)</th>
+              <th class="col-amount">Amount (₹)</th>
+              <th class="col-action screen-only">Action</th>
             </tr>
           </thead>
           <tbody id="orderTableBody">
-            <tr><td colspan="5" style="text-align:center;">Cart is empty. Add products from the list above.</td></tr>
+            <tr>
+              <td colspan="6" style="text-align:center; padding: 24px; color: #64748b;">
+                Your invoice cart is currently empty. Search and add products from the catalog above.
+              </td>
+            </tr>
           </tbody>
         </table>
-      </div>
+      </section>
 
-      <div class="totals">
-        <div class="totals-box">
-          <div class="totals-row">
-            <span>Subtotal</span>
-            <strong id="subtotalValue">₹5,500.00</strong>
+      <!-- Totals & Payment Summary -->
+      <section class="summary-grid">
+        
+        <!-- Left: Amount in Words + Terms -->
+        <div class="notes-terms-box">
+          <!-- Amount in Words -->
+          <div class="amount-words-card">
+            <div class="label">Amount Chargeable (in words)</div>
+            <div class="words" id="amountInWordsDisplay">Rupees Zero Only</div>
           </div>
-          <div class="totals-row">
-            <span>Tax (5%)</span>
-            <strong id="taxValue">₹275.00</strong>
-          </div>
-          <div class="totals-row total">
-            <span>Total</span>
-            <strong id="grandTotalValue">₹5,775.00</strong>
+
+          <!-- Terms & Conditions -->
+          <div class="terms-box">
+            <strong>Terms & Conditions:</strong><br />
+            1. Goods once sold will not be accepted back or exchanged.<br />
+            2. Payment is due within the stipulated credit terms.<br />
+            3. All disputes are strictly subject to Sivakasi Jurisdiction.<br />
+            4. This is a computer-generated tax invoice.
           </div>
         </div>
-      </div>
 
-      <div class="field" style="margin-top: 22px;">
-        <label for="notes">Notes</label>
-        <textarea id="notes">Thank you for your business. Payment is due within 15 days.</textarea>
-      </div>
+        <!-- Right: Totals Card + Signatory -->
+        <div class="totals-card">
+          <div class="totals-row">
+            <span>Subtotal</span>
+            <strong id="subtotalValue">₹0.00</strong>
+          </div>
 
-      <div class="actions">
-        <button type="button" class="secondary" id="printBtn">Print</button>
-        <button type="button" class="primary" id="savePdfBtn">Save as PDF</button>
-      </div>
+          <div class="totals-row">
+            <span>
+              Tax (GST):
+              <select id="taxRateSelect" class="tax-select screen-only">
+                <option value="5" selected>5% GST</option>
+                <option value="18">18% GST</option>
+                <option value="12">12% GST</option>
+                <option value="0">0% (Exempt)</option>
+              </select>
+              <span class="print-only" id="taxRatePrint">5%</span>
+            </span>
+            <strong id="taxValue">₹0.00</strong>
+          </div>
 
-      <div id="statusMessage" class="status" aria-live="polite"></div>
-    </div>
-  </div>
+          <div class="totals-row grand-total">
+            <span>Grand Total</span>
+            <strong id="grandTotalValue">₹0.00</strong>
+          </div>
+
+          <!-- Signatory Box -->
+          <div class="signature-area">
+            <div class="sign-company">For Sri Puthiyavan Crackers</div>
+            <div class="sign-line"></div>
+            <div class="sign-label">Authorized Signatory</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Bottom Note -->
+      <footer class="invoice-footer-note">
+        Thank you for celebrating with Sri Puthiyavan Crackers Sivakasi! May your festivities be bright, joyful & safe.
+      </footer>
+
+    </article>
+  </main>
 
   <script>
-    const { jsPDF } = window.jspdf;
     let products = [];
     let cart = [];
 
+    // Helper: Currency Formatter for Indian Rupees
     function formatCurrency(value) {
       return new Intl.NumberFormat('en-IN', {
         style: 'currency',
@@ -603,67 +1100,133 @@
       }).format(value || 0);
     }
 
-    function parseNumber(value) {
-      const num = Number(String(value).replace(/[^0-9.-]/g, '')) || 0;
-      return Number.isFinite(num) ? num : 0;
+    // Helper: Convert Number to Words (Indian Numbering Format: Lakhs, Crores)
+    function numberToWordsIndian(num) {
+      const n = Math.floor(num);
+      if (n <= 0) return 'Rupees Zero Only';
+
+      const a = [
+        '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+        'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
+        'Seventeen', 'Eighteen', 'Nineteen'
+      ];
+      const b = [
+        '', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
+      ];
+
+      function twoDigits(val) {
+        if (val < 20) return a[val];
+        return b[Math.floor(val / 10)] + (val % 10 ? ' ' + a[val % 10] : '');
+      }
+
+      function threeDigits(val) {
+        const hundred = Math.floor(val / 100);
+        const rest = val % 100;
+        let res = '';
+        if (hundred > 0) res += a[hundred] + ' Hundred';
+        if (rest > 0) res += (res ? ' and ' : '') + twoDigits(rest);
+        return res;
+      }
+
+      let words = '';
+      const crore = Math.floor(n / 10000000);
+      let rem = n % 10000000;
+      const lakh = Math.floor(rem / 100000);
+      rem = rem % 100000;
+      const thousand = Math.floor(rem / 1000);
+      rem = rem % 1000;
+
+      if (crore > 0) words += twoDigits(crore) + ' Crore ';
+      if (lakh > 0) words += twoDigits(lakh) + ' Lakh ';
+      if (thousand > 0) words += twoDigits(thousand) + ' Thousand ';
+      if (rem > 0) words += threeDigits(rem) + ' ';
+
+      const paise = Math.round((num - n) * 100);
+      let paiseWords = '';
+      if (paise > 0) {
+        paiseWords = ' and ' + twoDigits(paise) + ' Paise';
+      }
+
+      return 'Rupees ' + words.trim() + paiseWords + ' Only';
     }
 
+    // Load available products from products.xlsx
     async function loadProducts() {
       try {
         const response = await fetch('products.xlsx');
-        if (!response.ok) throw new Error('products.xlsx not found in root path');
+        if (!response.ok) throw new Error('products.xlsx could not be loaded from root directory');
 
         const data = await response.arrayBuffer();
         const workbook = XLSX.read(data, { type: 'array' });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
-        if (json.length === 0) throw new Error('products.xlsx is empty');
+        if (json.length === 0) throw new Error('products.xlsx contains no data');
 
-        products = json.map(row => ({
-          serial: row['Product Serial Number'] ?? row['Serial Number'] ?? row['Serial'] ?? row['serial'] ?? '',
-          name: row['Product Name'] ?? row['Name'] ?? row['name'] ?? '',
-          desc: row['Product Description'] ?? row['Description'] ?? row['desc'] ?? '',
+        products = json.map((row, idx) => ({
+          serial: String(row['Product Serial Number'] ?? row['Serial Number'] ?? row['Serial'] ?? row['serial'] ?? (idx + 1)).trim(),
+          name: String(row['Product Name'] ?? row['Name'] ?? row['name'] ?? '').trim(),
+          desc: String(row['Product Description'] ?? row['Description'] ?? row['desc'] ?? '').trim(),
           price: parseFloat(row['Product Price'] ?? row['Price'] ?? row['price'] ?? 0)
         })).filter(p => p.name && p.price >= 0);
 
+        document.getElementById('productCountBadge').textContent = `(${products.length} products loaded)`;
         renderProducts();
       } catch (error) {
+        console.error('Error loading products.xlsx:', error);
         const tbody = document.getElementById('productsTableBody');
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#dc2626;">Error loading products.xlsx: ' + error.message + '</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#dc2626; padding: 20px;">
+          Error loading products.xlsx: ${error.message}
+        </td></tr>`;
       }
     }
 
+    // Render available products catalog with search filtering
     function renderProducts() {
       const tbody = document.getElementById('productsTableBody');
+      const query = (document.getElementById('productSearchInput').value || '').toLowerCase().trim();
+
+      const filtered = products.filter(p => {
+        if (!query) return true;
+        return p.name.toLowerCase().includes(query) ||
+               p.serial.toLowerCase().includes(query) ||
+               p.desc.toLowerCase().includes(query);
+      });
+
       tbody.innerHTML = '';
 
-      if (products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No products found.</td></tr>';
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px; color:#64748b;">No products matching your search.</td></tr>';
         return;
       }
 
-      products.forEach((product, index) => {
+      filtered.forEach((product, idx) => {
         const row = document.createElement('tr');
+        const idKey = encodeURIComponent(product.serial || product.name);
         row.innerHTML = `
-          <td>${product.serial || index + 1}</td>
-          <td>${product.name}</td>
-          <td>${product.desc || '-'}</td>
-          <td>${formatCurrency(product.price)}</td>
-          <td><input type="number" min="1" value="1" id="qty-${product.serial || product.name}" style="width:100%; border:1px solid var(--line); border-radius:6px; padding:6px 8px;" /></td>
-          <td><button type="button" class="primary" onclick="addToCart('${product.serial || product.name}')" style="padding:8px 12px; font-size:12px;">Add</button></td>
+          <td class="center" style="font-weight:600; color:#64748b;">${product.serial || idx + 1}</td>
+          <td><strong>${product.name}</strong></td>
+          <td style="color:#64748b; font-size:12px;">${product.desc || '-'}</td>
+          <td class="right" style="font-weight:600;">${formatCurrency(product.price)}</td>
+          <td class="center">
+            <input type="number" min="1" value="1" id="qty-input-${idKey}" class="table-input" style="width: 70px;" />
+          </td>
+          <td class="center">
+            <button type="button" class="btn btn-primary btn-sm" onclick="addToCart('${idKey}')">+ Add</button>
+          </td>
         `;
         tbody.appendChild(row);
       });
     }
 
-    function addToCart(serial) {
-      const key = String(serial);
-      const qtyInput = document.getElementById('qty-' + key);
+    // Add item to Cart
+    function addToCart(encodedKey) {
+      const key = decodeURIComponent(encodedKey);
+      const qtyInput = document.getElementById('qty-input-' + encodedKey);
       const qty = parseInt(qtyInput ? qtyInput.value : '1', 10);
 
       if (!Number.isFinite(qty) || qty < 1) {
-        alert('Please enter a valid quantity');
+        alert('Please enter a valid quantity (1 or more).');
         return;
       }
 
@@ -674,33 +1237,59 @@
       if (existing) {
         existing.qty += qty;
       } else {
-        cart.push({ serial: product.serial || product.name, name: product.name, price: product.price, qty });
+        cart.push({
+          serial: product.serial || product.name,
+          name: product.name,
+          price: product.price,
+          qty: qty
+        });
       }
 
       renderCart();
+      setStatus(`Added "${product.name}" (${qty} qty) to invoice.`);
     }
 
-    function removeFromCart(serial) {
-      cart = cart.filter(item => String(item.serial || item.name) !== String(serial));
+    // Remove item from Cart
+    function removeFromCart(encodedKey) {
+      const key = decodeURIComponent(encodedKey);
+      cart = cart.filter(item => String(item.serial || item.name) !== key);
       renderCart();
+      setStatus('Product removed from invoice.');
     }
 
+    // Render Cart / Order Table
     function renderCart() {
       const tbody = document.getElementById('orderTableBody');
       tbody.innerHTML = '';
 
       if (cart.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cart is empty. Add products from the list above.</td></tr>';
+        tbody.innerHTML = `<tr>
+          <td colspan="6" style="text-align:center; padding: 28px; color: #64748b;">
+            Your invoice cart is currently empty. Search and add products from the catalog above.
+          </td>
+        </tr>`;
       } else {
         cart.forEach((item, index) => {
           const amount = item.qty * item.price;
+          const encodedKey = encodeURIComponent(String(item.serial || item.name));
           const row = document.createElement('tr');
           row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${item.name}</td>
-            <td><input type="number" min="1" value="${item.qty}" class="small" data-serial="${String(item.serial || item.name)}" style="width:100%; border:1px solid var(--line); border-radius:6px; padding:6px 8px;" /></td>
-            <td><input type="number" min="0" step="0.01" value="${item.price}" class="small" data-serial="${String(item.serial || item.name)}" style="width:100%; border:1px solid var(--line); border-radius:6px; padding:6px 8px;" /></td>
-            <td class="align-right">${formatCurrency(amount)}</td>
+            <td class="col-sno">${index + 1}</td>
+            <td>
+              <strong>${item.name}</strong>
+            </td>
+            <td class="col-qty">
+              <span class="print-only">${item.qty}</span>
+              <input type="number" min="1" value="${item.qty}" class="table-input screen-only cart-qty" data-key="${encodedKey}" />
+            </td>
+            <td class="col-price">
+              <span class="print-only">${formatCurrency(item.price)}</span>
+              <input type="number" min="0" step="0.01" value="${item.price}" class="table-input price-input screen-only cart-price" data-key="${encodedKey}" />
+            </td>
+            <td class="col-amount">${formatCurrency(amount)}</td>
+            <td class="col-action screen-only">
+              <button type="button" class="btn-delete" title="Remove item" onclick="removeFromCart('${encodedKey}')">✕</button>
+            </td>
           `;
           tbody.appendChild(row);
         });
@@ -710,63 +1299,115 @@
       updateInvoiceSummary();
     }
 
+    // Bind real-time input change listeners for cart quantity & price
     function bindCartInputs() {
-      document.querySelectorAll('#orderTableBody input[type="number"]').forEach((input) => {
+      document.querySelectorAll('#orderTableBody .cart-qty').forEach(input => {
         input.oninput = function () {
-          const serial = String(input.dataset.serial);
-          const item = cart.find(product => String(product.serial || product.name) === serial);
+          const key = decodeURIComponent(input.dataset.key);
+          const item = cart.find(p => String(p.serial || p.name) === key);
           if (!item) return;
 
-          const isQtyField = input.parentElement.previousElementSibling ? input.parentElement.previousElementSibling.textContent.trim() !== '' : false;
-          if (input.parentElement.cellIndex === 2) {
-            item.qty = Math.max(0, parseInt(input.value || '0', 10) || 0);
-            if (item.qty === 0) {
-              removeFromCart(serial);
-              return;
-            }
-          } else if (input.parentElement.cellIndex === 3) {
-            item.price = Math.max(0, parseFloat(input.value || '0') || 0);
+          const val = parseInt(input.value || '0', 10);
+          if (val <= 0) {
+            removeFromCart(encodeURIComponent(key));
+            return;
           }
+          item.qty = val;
+          renderCart();
+        };
+      });
 
+      document.querySelectorAll('#orderTableBody .cart-price').forEach(input => {
+        input.oninput = function () {
+          const key = decodeURIComponent(input.dataset.key);
+          const item = cart.find(p => String(p.serial || p.name) === key);
+          if (!item) return;
+
+          const val = parseFloat(input.value || '0');
+          item.price = Math.max(0, val);
           renderCart();
         };
       });
     }
 
+    // Synchronize inputs with print mirror spans
+    function syncPrintMirror() {
+      const fields = [
+        ['customerName', 'customerNamePrint'],
+        ['customerPhone', 'customerPhonePrint'],
+        ['customerAddress', 'customerAddressPrint'],
+        ['invoiceNo', 'invoiceNoPrint'],
+        ['invoiceDate', 'invoiceDatePrint'],
+        ['dueDate', 'dueDatePrint'],
+        ['paymentMode', 'paymentModePrint']
+      ];
+
+      fields.forEach(([inputId, printId]) => {
+        const input = document.getElementById(inputId);
+        const printEl = document.getElementById(printId);
+        if (input && printEl) {
+          printEl.textContent = input.value || '-';
+        }
+      });
+
+      const taxRate = document.getElementById('taxRateSelect')?.value || '5';
+      const taxPrint = document.getElementById('taxRatePrint');
+      if (taxPrint) taxPrint.textContent = taxRate + '%';
+    }
+
+    // Calculate Subtotal, Tax, and Grand Total
     function updateInvoiceSummary() {
       const subtotal = cart.reduce((sum, item) => sum + (item.qty * item.price), 0);
-      const tax = subtotal * 0.05;
+      const taxRate = parseFloat(document.getElementById('taxRateSelect')?.value || '5');
+      const tax = (subtotal * taxRate) / 100;
       const grandTotal = subtotal + tax;
 
       document.getElementById('subtotalValue').textContent = formatCurrency(subtotal);
       document.getElementById('taxValue').textContent = formatCurrency(tax);
       document.getElementById('grandTotalValue').textContent = formatCurrency(grandTotal);
+
+      // Amount in Words
+      const words = numberToWordsIndian(grandTotal);
+      document.getElementById('amountInWordsDisplay').textContent = words;
+
+      syncPrintMirror();
     }
 
+    // Set Default Today and Due Date
     function setCurrentDateFields() {
       const today = new Date();
       const yyyy = today.getFullYear();
       const mm = String(today.getMonth() + 1).padStart(2, '0');
       const dd = String(today.getDate()).padStart(2, '0');
       const todayStr = `${yyyy}-${mm}-${dd}`;
+
+      // Default due date: 15 days from today
+      const dueDateObj = new Date();
+      dueDateObj.setDate(dueDateObj.getDate() + 15);
+      const dYyyy = dueDateObj.getFullYear();
+      const dMm = String(dueDateObj.getMonth() + 1).padStart(2, '0');
+      const dDd = String(dueDateObj.getDate()).padStart(2, '0');
+      const dueStr = `${dYyyy}-${dMm}-${dDd}`;
+
       document.getElementById('invoiceDate').value = todayStr;
-      document.getElementById('dueDate').value = todayStr;
-      document.getElementById('invoiceDateDisplay').textContent = 'Date: ' + new Date(todayStr).toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      });
+      document.getElementById('dueDate').value = dueStr;
+
+      const formatted = today.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      const formattedDue = dueDateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+      document.getElementById('invoiceDateDisplay').textContent = formatted;
+      document.getElementById('dueDateDisplay').textContent = formattedDue;
+      syncPrintMirror();
     }
 
+    // Fetch next invoice number from server or localStorage
     function getInvoiceNumberFromServer() {
       return fetch('/api/invoice/next-number.php', {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       })
       .then(async (response) => {
-        if (!response.ok) {
-          throw new Error('Unable to fetch next invoice number');
-        }
+        if (!response.ok) throw new Error('API returned ' + response.status);
         const data = await response.json();
         return data.invoiceNo || data.number || 'SPC00001';
       })
@@ -783,15 +1424,21 @@
       const nextInvoiceNo = await getInvoiceNumberFromServer();
       document.getElementById('invoiceNo').value = nextInvoiceNo;
       document.getElementById('invoiceNoDisplay').textContent = nextInvoiceNo;
+      syncPrintMirror();
       return nextInvoiceNo;
     }
 
+    // Status message toast
     function setStatus(message, isError = false) {
       const el = document.getElementById('statusMessage');
       el.textContent = message;
-      el.classList.toggle('error', isError);
+      el.className = 'status-msg show ' + (isError ? 'error' : 'success');
+      setTimeout(() => {
+        el.className = 'status-msg';
+      }, 5000);
     }
 
+    // Save PDF Blob to Server
     async function savePdfToServer(blob, invoiceNo) {
       const year = new Date().getFullYear();
       const fileName = `${invoiceNo}.pdf`;
@@ -811,18 +1458,15 @@
         });
 
         if (!response.ok) {
-          const text = await response.text();
-          console.warn('Server PDF save failed, falling back to browser download:', text || 'Server save failed');
           return { fileName, directory, fallback: true };
         }
-
         return { fileName, directory, fallback: false };
       } catch (error) {
-        console.warn('No PDF save API available, falling back to browser download:', error);
         return { fileName, directory, fallback: true };
       }
     }
 
+    // Trigger browser file download
     function triggerDownload(blob, fileName) {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -834,100 +1478,409 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
+    // =========================================================================
+    // PROFESSIONAL MULTI-PAGE PDF GENERATOR (NO REPEATING ROWS ON PAGE BOUNDARY)
+    // =========================================================================
     async function generatePdf() {
-      const invoiceNo = document.getElementById('invoiceNo').value || 'SPC00001';
+      const invoiceNo = document.getElementById('invoiceNo').value.trim() || 'SPC00001';
       const invoiceFileName = `${invoiceNo}.pdf`;
-      const original = document.getElementById('invoicePage');
-      const productsPanel = document.querySelector('.products-panel');
-      const oldWidth = original.style.width;
-      const oldMaxWidth = original.style.maxWidth;
-      const wasHidden = productsPanel && productsPanel.classList.contains('hidden');
-      original.style.width = '794px';
-      original.style.maxWidth = '794px';
+      setStatus('Generating high-resolution vector PDF invoice...');
 
       try {
-        if (productsPanel) {
-          productsPanel.classList.add('hidden');
-        }
-
-        const canvas = await html2canvas(original, {
-          scale: 2,
-          backgroundColor: '#ffffff',
-          useCORS: true,
-          logging: false
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
         });
 
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = pageWidth - 16;
-        const pageImageHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = pageImageHeight;
-        let position = 8;
+        const pageWidth = doc.internal.pageSize.getWidth();   // 210mm
+        const pageHeight = doc.internal.pageSize.getHeight(); // 297mm
+        const margin = 14;
+        const contentWidth = pageWidth - (margin * 2);        // 182mm
 
-        pdf.addImage(imgData, 'PNG', 8, position, imgWidth, pageImageHeight, undefined, 'FAST');
-        heightLeft -= pageHeight - 16;
+        // Retrieve field values
+        const customerName = document.getElementById('customerName').value.trim() || 'Valued Customer';
+        const customerPhone = document.getElementById('customerPhone').value.trim() || '-';
+        const customerAddress = document.getElementById('customerAddress').value.trim() || '-';
+        const invoiceDateStr = document.getElementById('invoiceDate').value || new Date().toISOString().split('T')[0];
+        const dueDateStr = document.getElementById('dueDate').value || invoiceDateStr;
+        const paymentMode = document.getElementById('paymentMode').value || 'Cash';
+        const taxRate = parseFloat(document.getElementById('taxRateSelect')?.value || '5');
 
-        while (heightLeft > 0) {
-          position = heightLeft - pageImageHeight + 8;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 8, position, imgWidth, pageImageHeight, undefined, 'FAST');
-          heightLeft -= pageHeight - 16;
+        const formattedDate = new Date(invoiceDateStr + 'T00:00:00').toLocaleDateString('en-GB', {
+          day: '2-digit', month: 'short', year: 'numeric'
+        });
+        const formattedDueDate = new Date(dueDateStr + 'T00:00:00').toLocaleDateString('en-GB', {
+          day: '2-digit', month: 'short', year: 'numeric'
+        });
+
+        // 1. BRANDING & HEADER
+        const startY = 14;
+        const logoImg = document.getElementById('companyLogo');
+        let textStartX = margin;
+
+        if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
+          try {
+            doc.addImage(logoImg, 'PNG', margin, startY, 20, 20);
+            textStartX = margin + 24;
+          } catch (e) {
+            console.warn('Logo could not be added:', e);
+          }
         }
 
-        const pdfBlob = pdf.output('blob');
+        // Company Name & Subtitles
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.setTextColor(15, 23, 42); // slate-900
+        doc.text('SRI PUTHIYAVAN CRACKERS', textStartX, startY + 5.5);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(185, 28, 28); // accent red
+        doc.text('DIRECT SIVAKASI MANUFACTURER • MADE FOR BRIGHTER CELEBRATIONS', textStartX, startY + 9.5);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139); // slate-500
+        doc.text('12, Market Road, Sivakasi, Tamil Nadu - 626123, India', textStartX, startY + 13.5);
+        doc.text('Phone / WhatsApp: +91 90033 57888 / +91 96775 39254  |  Email: sriputhiyavan@gmail.com', textStartX, startY + 17.5);
+
+        // Right Header: TAX INVOICE Badge
+        const rightColX = pageWidth - margin;
+        doc.setFillColor(15, 23, 42);
+        doc.roundedRect(rightColX - 38, startY, 38, 7.5, 1.5, 1.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255);
+        doc.text('TAX INVOICE', rightColX - 19, startY + 5.2, { align: 'center' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(15, 23, 42);
+        doc.text(`Invoice No: ${invoiceNo}`, rightColX, startY + 12.5, { align: 'right' });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`Date: ${formattedDate}`, rightColX, startY + 16.5, { align: 'right' });
+
+        // Divider
+        let currentY = startY + 23;
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.4);
+        doc.line(margin, currentY, pageWidth - margin, currentY);
+
+        // 2. BILLED TO & INVOICE DETAILS CARDS
+        currentY += 4;
+        const cardWidth = (contentWidth - 6) / 2;
+        const cardHeight = 24;
+
+        // Bill To Box
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(margin, currentY, cardWidth, cardHeight, 1.5, 1.5, 'F');
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(margin, currentY, cardWidth, cardHeight, 1.5, 1.5, 'S');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(100, 116, 139);
+        doc.text('BILLED TO (CUSTOMER DETAILS)', margin + 3.5, currentY + 5);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.5);
+        doc.setTextColor(15, 23, 42);
+        doc.text(customerName, margin + 3.5, currentY + 10);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`Phone: ${customerPhone}`, margin + 3.5, currentY + 14.5);
+
+        const addrLines = doc.splitTextToSize(`Address: ${customerAddress}`, cardWidth - 7);
+        doc.text(addrLines.slice(0, 2), margin + 3.5, currentY + 18.5);
+
+        // Invoice Meta Box
+        const metaBoxX = margin + cardWidth + 6;
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(metaBoxX, currentY, cardWidth, cardHeight, 1.5, 1.5, 'F');
+        doc.roundedRect(metaBoxX, currentY, cardWidth, cardHeight, 1.5, 1.5, 'S');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(100, 116, 139);
+        doc.text('INVOICE & PAYMENT DETAILS', metaBoxX + 3.5, currentY + 5);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`Payment Due Date: ${formattedDueDate}`, metaBoxX + 3.5, currentY + 10);
+        doc.text(`Payment Mode: ${paymentMode}`, metaBoxX + 3.5, currentY + 14.5);
+        doc.text(`Place of Supply: Sivakasi, Tamil Nadu (State Code: 33)`, metaBoxX + 3.5, currentY + 18.5);
+
+        // 3. TABLE DATA WITH AUTOTABLE (PROPER MULTI-PAGE PAGINATION)
+        const tableStartY = currentY + cardHeight + 5;
+
+        const tableBody = cart.map((item, idx) => {
+          const itemAmount = (item.qty || 0) * (item.price || 0);
+          return [
+            String(idx + 1),
+            item.name,
+            String(item.qty),
+            formatCurrency(item.price).replace('₹', 'Rs. '),
+            formatCurrency(itemAmount).replace('₹', 'Rs. ')
+          ];
+        });
+
+        if (tableBody.length === 0) {
+          tableBody.push(['-', 'No items added in this invoice', '0', 'Rs. 0.00', 'Rs. 0.00']);
+        }
+
+        // Calculations
+        const subtotal = cart.reduce((sum, item) => sum + ((item.qty || 0) * (item.price || 0)), 0);
+        const taxAmount = (subtotal * taxRate) / 100;
+        const grandTotal = subtotal + taxAmount;
+        const amountInWords = numberToWordsIndian(grandTotal);
+
+        // Render Table using AutoTable
+        doc.autoTable({
+          startY: tableStartY,
+          head: [['#', 'Item Description', 'Qty', 'Rate (Rs.)', 'Amount (Rs.)']],
+          body: tableBody,
+          margin: { left: margin, right: margin, top: 16, bottom: 20 },
+          theme: 'grid',
+          showHead: 'everyPage', // REPEATS HEADER CLEANLY ON PAGE 2, 3, etc.
+          headStyles: {
+            fillColor: [15, 23, 42],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            fontSize: 8,
+            cellPadding: 2.6
+          },
+          styles: {
+            fontSize: 8,
+            textColor: [15, 23, 42],
+            lineColor: [226, 232, 240],
+            lineWidth: 0.2,
+            cellPadding: 2.4
+          },
+          alternateRowStyles: {
+            fillColor: [248, 250, 252]
+          },
+          columnStyles: {
+            0: { cellWidth: 12, halign: 'center' },
+            1: { cellWidth: 'auto', halign: 'left' },
+            2: { cellWidth: 16, halign: 'center' },
+            3: { cellWidth: 26, halign: 'right' },
+            4: { cellWidth: 30, halign: 'right', fontStyle: 'bold' }
+          },
+          didDrawPage: function (data) {
+            // Running header for subsequent pages (Page 2+)
+            if (data.pageNumber > 1) {
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(7.5);
+              doc.setTextColor(100, 116, 139);
+              doc.text(`Sri Puthiyavan Crackers • Tax Invoice #${invoiceNo} (Contd.)`, margin, 10);
+              doc.text(`Page ${data.pageNumber}`, pageWidth - margin, 10, { align: 'right' });
+            }
+          }
+        });
+
+        // 4. SUMMARY, TERMS & SIGNATURE SECTION
+        let finalY = doc.lastAutoTable.finalY + 6;
+
+        // Check if sufficient vertical space (40mm) remains on current page; otherwise clean page-break
+        if (finalY + 40 > pageHeight - margin) {
+          doc.addPage();
+          finalY = 16;
+        }
+
+        const totalsBoxWidth = 72;
+        const totalsBoxX = pageWidth - margin - totalsBoxWidth;
+        const leftDetailsWidth = contentWidth - totalsBoxWidth - 6;
+
+        // Left Section: Amount in Words + Terms
+        let leftY = finalY;
+
+        // Amount in Words Box
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(margin, leftY, leftDetailsWidth, 12, 1.5, 1.5, 'F');
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(margin, leftY, leftDetailsWidth, 12, 1.5, 1.5, 'S');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(100, 116, 139);
+        doc.text('AMOUNT CHARGEABLE (IN WORDS)', margin + 3.5, leftY + 4);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(15, 23, 42);
+        const splitWords = doc.splitTextToSize(amountInWords, leftDetailsWidth - 7);
+        doc.text(splitWords.slice(0, 2), margin + 3.5, leftY + 8.5);
+
+        leftY += 15;
+
+        // Terms & Conditions Box
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(margin, leftY, leftDetailsWidth, 19, 1.5, 1.5, 'S');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(100, 116, 139);
+        doc.text('TERMS & CONDITIONS', margin + 3.5, leftY + 4.5);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.8);
+        doc.setTextColor(100, 116, 139);
+        doc.text('1. Goods once sold will not be accepted back or exchanged.', margin + 3.5, leftY + 9);
+        doc.text('2. All disputes are strictly subject to Sivakasi Jurisdiction.', margin + 3.5, leftY + 13);
+        doc.text('3. This is a computer-generated commercial tax invoice.', margin + 3.5, leftY + 16.5);
+
+        // Right Section: Totals Card
+        let rightY = finalY;
+
+        // Subtotal row
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105);
+        doc.text('Subtotal:', totalsBoxX + 4, rightY + 4);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text(formatCurrency(subtotal).replace('₹', 'Rs. '), pageWidth - margin - 4, rightY + 4, { align: 'right' });
+
+        rightY += 5.5;
+
+        // Tax row
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(71, 85, 105);
+        doc.text(`Tax (${taxRate}% GST):`, totalsBoxX + 4, rightY + 4);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text(formatCurrency(taxAmount).replace('₹', 'Rs. '), pageWidth - margin - 4, rightY + 4, { align: 'right' });
+
+        rightY += 7;
+
+        // Grand Total Badge Box
+        doc.setFillColor(15, 23, 42);
+        doc.roundedRect(totalsBoxX, rightY, totalsBoxWidth, 8.5, 1.5, 1.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(255, 255, 255);
+        doc.text('Grand Total:', totalsBoxX + 4, rightY + 5.5);
+        doc.text(formatCurrency(grandTotal).replace('₹', 'Rs. '), pageWidth - margin - 4, rightY + 5.5, { align: 'right' });
+
+        rightY += 12;
+
+        // Authorized Signatory
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(15, 23, 42);
+        doc.text('For SRI PUTHIYAVAN CRACKERS', totalsBoxX + (totalsBoxWidth / 2), rightY + 4, { align: 'center' });
+
+        doc.setDrawColor(203, 213, 225);
+        doc.setLineWidth(0.3);
+        doc.line(totalsBoxX + 8, rightY + 16, totalsBoxX + totalsBoxWidth - 8, rightY + 16);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.8);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Authorized Signatory', totalsBoxX + (totalsBoxWidth / 2), rightY + 20, { align: 'center' });
+
+        // 5. RUNNING FOOTER (PAGE NUMBERS) ON ALL PAGES
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7);
+          doc.setTextColor(148, 163, 184);
+          doc.text('Thank you for celebrating with Sri Puthiyavan Crackers, Sivakasi! • www.sriputhiyavan.com', margin, pageHeight - 7);
+          doc.text(`Page ${i} of ${totalPages}`, pageWidth - margin, pageHeight - 7, { align: 'right' });
+        }
+
+        // Generate Blob and Upload / Download
+        const pdfBlob = doc.output('blob');
         const saveResult = await savePdfToServer(pdfBlob, invoiceNo);
         triggerDownload(pdfBlob, invoiceFileName);
 
         if (saveResult.fallback) {
-          setStatus(`Invoice generated successfully and downloaded as ${invoiceFileName}.`);
+          setStatus(`Invoice PDF downloaded as ${invoiceFileName}.`);
         } else {
           const savedPath = `/Invoice/${new Date().getFullYear()}/${invoiceFileName}`;
-          setStatus(`Invoice saved to server: ${savedPath} and downloaded as ${invoiceFileName}.`);
+          setStatus(`Invoice saved to server (${savedPath}) and downloaded.`);
         }
+
       } catch (error) {
-        console.error(error);
-        setStatus('PDF generation failed. Please try again.', true);
-      } finally {
-        if (productsPanel && !wasHidden) {
-          productsPanel.classList.remove('hidden');
-        }
-        original.style.width = oldWidth || '';
-        original.style.maxWidth = oldMaxWidth || '';
+        console.error('PDF Generation Error:', error);
+        setStatus('PDF generation failed: ' + error.message, true);
       }
     }
 
+    // Event Listeners
     document.getElementById('savePdfBtn').addEventListener('click', async () => {
-      setStatus('Generating and saving invoice PDF...');
       await generatePdf();
     });
 
     document.getElementById('printBtn').addEventListener('click', () => {
+      syncPrintMirror();
       window.print();
     });
 
-    document.getElementById('invoiceDate').addEventListener('input', function () {
-      const value = this.value;
-      if (value) {
-        const formatted = new Date(value + 'T00:00:00');
-        document.getElementById('invoiceDateDisplay').textContent = 'Date: ' + formatted.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
+    // Toggle catalog drawer
+    document.getElementById('toggleCatalogBtn').addEventListener('click', () => {
+      const panel = document.getElementById('productsPanel');
+      if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+      } else {
+        panel.style.display = 'none';
+      }
+    });
+
+    // Product search filter
+    document.getElementById('productSearchInput').addEventListener('input', () => {
+      renderProducts();
+    });
+
+    // Tax rate selector
+    document.getElementById('taxRateSelect').addEventListener('change', () => {
+      updateInvoiceSummary();
+    });
+
+    // Synchronize displays on input
+    ['customerName', 'customerPhone', 'customerAddress', 'invoiceNo', 'invoiceDate', 'dueDate', 'paymentMode'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => {
+          syncPrintMirror();
+          if (id === 'invoiceNo') {
+            document.getElementById('invoiceNoDisplay').textContent = el.value || 'SPC00001';
+          }
+          if (id === 'paymentMode') {
+            document.getElementById('paymentModeDisplay').textContent = el.value || 'Cash';
+          }
+        });
+        el.addEventListener('change', () => {
+          syncPrintMirror();
+          if (id === 'invoiceDate' && el.value) {
+            const formatted = new Date(el.value + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            document.getElementById('invoiceDateDisplay').textContent = formatted;
+          }
+          if (id === 'dueDate' && el.value) {
+            const formatted = new Date(el.value + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            document.getElementById('dueDateDisplay').textContent = formatted;
+          }
         });
       }
     });
 
-    setCurrentDateFields();
-    loadProducts();
-    renderCart();
-    updateInvoiceSummary();
-    prepareInvoiceNumber().catch((error) => {
-      console.warn('Using fallback invoice number:', error);
-      const fallback = `SPC${String((Number(localStorage.getItem('invoice_last_number') || 1))).padStart(5, '0')}`;
-      document.getElementById('invoiceNo').value = fallback;
-      document.getElementById('invoiceNoDisplay').textContent = fallback;
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', () => {
+      setCurrentDateFields();
+      loadProducts();
+      renderCart();
+      prepareInvoiceNumber().catch(err => {
+        console.warn('Using fallback invoice number:', err);
+      });
     });
   </script>
 </body>

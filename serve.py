@@ -169,7 +169,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         request_path = urlparse(self.path).path
-        if request_path == '/api/invoice/next-number':
+        if request_path in ('/api/invoice/next-number', '/api/invoice/next-number.php'):
             year = datetime.now().year
             invoice_no = get_next_invoice_number(year)
             self.send_response(200)
@@ -213,7 +213,7 @@ class Handler(SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self):
-        if self.path in ('/api/invoice/save-pdf', '/save-invoice'):
+        if self.path in ('/api/invoice/save-pdf', '/api/invoice/save-pdf.php', '/save-invoice'):
             try:
                 content_type = self.headers.get('Content-Type', '')
                 if not content_type.startswith('multipart/form-data'):
