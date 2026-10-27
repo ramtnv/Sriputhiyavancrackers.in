@@ -1,808 +1,1299 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin File Replacement</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f3ee">
+  <title>Superadmin | Sri Puthiyavan</title>
   <style>
     :root {
-      --bg-1: #020817;
-      --bg-2: #0b1120;
-      --bg-3: #111827;
-      --panel: rgba(15, 23, 42, 0.8);
-      --panel-strong: rgba(15, 23, 42, 0.96);
-      --panel-alt: rgba(30, 41, 59, 0.78);
-      --primary: #7c3aed;
-      --primary-2: #38bdf8;
-      --primary-3: #22d3ee;
-      --success: #22c55e;
-      --danger: #f87171;
-      --warning: #fbbf24;
-      --text: #e5eefb;
-      --muted: #9db1c9;
-      --line: rgba(148, 163, 184, 0.18);
-      --shadow: 0 22px 60px rgba(15, 23, 42, 0.55);
-      --ring: rgba(124, 58, 237, 0.55);
+      color-scheme: light;
+      --bg: #f4f3ef;
+      --paper: #fff;
+      --ink: #20221e;
+      --muted: #73766f;
+      --line: #e5e5df;
+      --accent: #a9432c;
+      --good: #28714f;
     }
-
     * { box-sizing: border-box; }
-
-    html { scroll-behavior: smooth; }
-
     body {
       margin: 0;
-      min-height: 100vh;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(124,58,237,0.28), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(56,189,248,0.18), transparent 30%),
-        linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 35%, var(--bg-3) 100%);
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    .top {
+      background: #20221e;
+      color: white;
+      padding: 15px max(18px, calc((100% - 1180px)/2));
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 32px;
-      position: relative;
-      overflow-x: hidden;
+      justify-content: space-between;
+      gap: 12px;
     }
-
-    body::before,
-    body::after {
-      content: "";
-      position: fixed;
-      width: 420px;
-      height: 420px;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.6;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    body::before {
-      background: rgba(124, 58, 237, 0.3);
-      top: -120px;
-      left: -80px;
-      animation: float 12s ease-in-out infinite alternate;
-    }
-
-    body::after {
-      background: rgba(34, 211, 238, 0.2);
-      bottom: -100px;
-      right: -60px;
-      animation: float 15s ease-in-out infinite alternate-reverse;
-    }
-
-    @keyframes float {
-      0% { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(30px, 25px) scale(1.08); }
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
-      width: min(1180px, 100%);
-      background: rgba(15, 23, 42, 0.72);
-      border: 1px solid var(--line);
-      border-radius: 26px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-
-    .topbar {
+    .top strong { letter-spacing: .06em; font-size: .9rem; }
+    .top a { color: #f0c782; text-decoration: none; }
+    main { width: min(100% - 28px, 1180px); margin: 30px auto 70px; }
+    .heading {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      gap: 20px;
-      padding: 28px 30px 22px;
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.35));
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -.04em; margin: 0; }
+    .heading p { margin: 4px 0 0; color: var(--muted); }
+    #connection { color: var(--good); font-size: .88rem; text-align: right; }
+    
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 18px;
+      align-items: start;
+    }
+    .controls { display: grid; gap: 14px; }
+    .panel, .sidebox {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      padding: 21px;
+      box-shadow: 0 7px 24px #171a1208;
+    }
+    .panel h2 { font-size: 1.08rem; margin: 0 0 4px; }
+    .help { color: var(--muted); font-size: .87rem; margin: 0 0 17px; }
+
+    /* Theme Presets */
+    .themes {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+      margin-bottom: 20px;
+    }
+    .theme {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 9px;
+      text-align: left;
+      cursor: pointer;
+      color: var(--ink);
+      font: inherit;
+      font-size: .8rem;
+      transition: border-color .15s ease, outline .15s ease;
+    }
+    .theme:before {
+      content: "";
+      display: block;
+      height: 17px;
+      border-radius: 5px;
+      background: var(--swatch);
+      margin-bottom: 6px;
+    }
+    .theme[aria-pressed=true] {
+      outline: 2px solid var(--accent);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Color Customizer Section Tabs & Search */
+    .color-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .color-tab {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .color-tab:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+    }
+    .color-tab.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: white;
+    }
+    .color-search {
+      width: 100%;
+      padding: 9px 12px;
+      margin-bottom: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: .84rem;
+      background: #fafaf8;
+    }
+    .color-search:focus {
+      background: #fff;
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    /* Color Groups & Grids */
+    .color-group {
+      margin-bottom: 16px;
+      background: #fbfbf9;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 14px 16px;
+    }
+    .color-group.hidden { display: none !important; }
+    .color-group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
       border-bottom: 1px solid var(--line);
     }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .brand-mark {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #f7fbff;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      box-shadow: 0 16px 22px rgba(124, 58, 237, 0.35);
-    }
-
-    .eyebrow {
-      margin: 0 0 4px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      font-size: 0.72rem;
-      color: var(--primary-3);
+    .color-group-title {
+      font-size: .88rem;
       font-weight: 700;
-    }
-
-    h1 {
+      color: var(--ink);
       margin: 0;
-      font-size: clamp(1.7rem, 2vw, 2.7rem);
-      letter-spacing: -0.04em;
-      line-height: 1.08;
     }
-
-    .toolbar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .toolbar button {
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      border-radius: 12px;
-      padding: 11px 16px;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      transition: 0.2s ease;
-      cursor: pointer;
-    }
-
-    .ghost {
-      background: rgba(15, 23, 42, 0.45);
-      color: var(--text);
-    }
-
-    .primary {
-      background: linear-gradient(135deg, var(--primary-2), var(--primary-3));
-      color: #041a2b;
-      border: none;
-      box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25);
-    }
-
-    .toolbar button:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.06);
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(180px, 1fr));
-      gap: 18px;
-      padding: 22px 30px 0;
-    }
-
-    .stat {
-      background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(15, 23, 42, 0.65));
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px 18px 16px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: inset 0 1px rgba(255,255,255,0.02);
-    }
-
-    .stat::before {
-      content: "";
-      position: absolute;
-      inset: 0 auto auto 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, var(--primary), var(--primary-2), transparent);
-    }
-
-    .label {
-      display: block;
+    .color-group-desc {
+      font-size: .76rem;
       color: var(--muted);
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    .number {
-      display: block;
-      font-weight: 800;
-      font-size: clamp(1.8rem, 2vw, 2.4rem);
-      letter-spacing: -0.04em;
-      line-height: 1.1;
-    }
-
-    .delta {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 10px;
-      font-size: 0.8rem;
-      color: var(--success);
-      font-weight: 700;
-    }
-
-    .files-panel {
-      padding: 22px 30px 30px;
-    }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 18px;
-      padding: 8px 4px;
-    }
-
-    .panel-header h2 {
       margin: 0;
-      font-size: clamp(1.15rem, 1.7vw, 1.6rem);
     }
-
-    .panel-header span {
-      border: 1px solid rgba(34, 211, 238, 0.3);
-      background: rgba(34, 211, 238, 0.08);
-      color: var(--primary-3);
-      border-radius: 999px;
-      padding: 7px 12px;
-      font-size: 0.76rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-
-    .files {
+    .color-grid {
       display: grid;
-      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
     }
-
-    .file-card {
-      background: linear-gradient(180deg, rgba(17, 24, 39, 0.95), rgba(15, 23, 42, 0.72));
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px 18px 16px;
-      display: grid;
-      gap: 14px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
-    }
-
-    .file-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(124, 58, 237, 0.35);
-      box-shadow: 0 16px 33px rgba(15, 23, 42, 0.35);
-    }
-
-    .file-card::after {
-      content: "";
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 1px;
-      background: linear-gradient(90deg, rgba(124,58,237,0.7), rgba(56,189,248,0.5), transparent);
-      opacity: 0.8;
-    }
-
-    .file-row {
+    .color-card {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 10px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: .82rem;
+      transition: border-color .15s ease;
     }
-
-    .file-main {
+    .color-card:hover {
+      border-color: #c5c5be;
+    }
+    .color-card.hidden { display: none !important; }
+    .color-info {
       display: flex;
-      align-items: center;
-      gap: 14px;
+      flex-direction: column;
+      gap: 2px;
       min-width: 0;
     }
-
-    .file-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      font-size: 0.82rem;
-      letter-spacing: 0.08em;
-      color: white;
-      background: linear-gradient(135deg, rgba(124,58,237,0.92), rgba(56,189,248,0.8));
-      box-shadow: 0 10px 18px rgba(124, 58, 237, 0.22);
+    .color-name {
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-
-    .file-name {
-      font-size: 1.02rem;
-      font-weight: 700;
-      color: var(--text);
-      word-break: break-all;
-    }
-
-    .file-tag {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 30px;
-      padding: 0 10px;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-weight: 700;
-      border: 1px solid rgba(56, 189, 248, 0.24);
-      background: rgba(56, 189, 248, 0.08);
-      color: var(--primary-3);
-    }
-
-    .upload-form {
+    .color-picker-wrap {
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
       align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
     }
-
-    input[type="file"] {
-      flex: 1 1 260px;
-      min-width: 220px;
-      background: rgba(15, 23, 42, 0.8);
-      color: var(--text);
+    .color-picker-wrap input[type=color] {
+      width: 34px;
+      height: 30px;
+      padding: 2px;
       border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px 14px;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+    }
+    .hex-input {
+      width: 68px;
+      padding: 5px 6px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: .75rem;
+      color: var(--ink);
+      text-align: center;
+      background: #fafaf8;
+      text-transform: uppercase;
+    }
+    .hex-input:focus {
+      background: white;
+      border-color: var(--accent);
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    input[type="file"]:focus {
-      border-color: rgba(124, 58, 237, 0.6);
-      box-shadow: 0 0 0 4px rgba(124,58,237,0.15);
+    /* Form Fields */
+    label { display: grid; gap: 6px; font-weight: 600; font-size: .86rem; }
+    input[type=text], textarea {
+      width: 100%;
+      padding: 10px 11px;
+      border: 1px solid #d8dad4;
+      border-radius: 8px;
+      background: white;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 400;
     }
-
-    input[type="file"]::file-selector-button {
-      margin-right: 12px;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(124,58,237,0.9), rgba(56,189,248,0.85));
-      color: white;
-      font-weight: 700;
-      padding: 9px 12px;
-      cursor: pointer;
+    textarea { min-height: 76px; resize: vertical; }
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 13px;
     }
-
-    button {
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: #eef8ff;
-      font-weight: 800;
-      padding: 12px 18px;
-      cursor: pointer;
-      transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
-      box-shadow: 0 10px 20px rgba(124, 58, 237, 0.23);
+    .fields label:has(textarea) { grid-column: span 2; }
+    input:focus, textarea:focus {
+      outline: 3px solid #a9432c26;
+      border-color: var(--accent);
     }
+    .range { display: flex; align-items: center; gap: 12px; }
+    .range input { width: 100%; accent-color: var(--accent); }
+    output { min-width: 75px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-    button:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.04);
-    }
-
-    .status {
-      min-height: 22px;
-      font-size: 0.9rem;
-      color: var(--muted);
-      padding-left: 2px;
-    }
-
-    .status.success { color: var(--success); }
-    .status.error { color: var(--danger); }
-
-    .custom-popup {
-      position: fixed;
-      right: 24px;
-      bottom: 24px;
-      width: min(420px, calc(100vw - 30px));
-      padding: 18px 18px 16px;
-      border-radius: 18px;
-      background: rgba(15, 23, 42, 0.96);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      box-shadow: 0 24px 40px rgba(2, 8, 23, 0.4);
-      transform: translateY(18px);
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.22s ease;
-      z-index: 40;
-    }
-
-    .custom-popup.show {
-      transform: translateY(0);
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .custom-popup.success {
-      border-color: rgba(34, 197, 94, 0.45);
-      box-shadow: 0 24px 40px rgba(34, 197, 94, 0.12);
-    }
-
-    .custom-popup.error {
-      border-color: rgba(248, 113, 113, 0.45);
-      box-shadow: 0 24px 40px rgba(248, 113, 113, 0.12);
-    }
-
-    .popup-header {
-      display: flex;
-      align-items: start;
-      justify-content: space-between;
+    /* Sticky Aside & Preview */
+    aside {
+      position: sticky;
+      top: 16px;
+      display: grid;
       gap: 12px;
+    }
+    .preview {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #faf8f4;
+      color: #181916;
+      font-size: .8rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    }
+    .preview-announcement {
+      padding: 5px 10px;
+      font-size: .65rem;
+      text-align: center;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      background: #23251f;
+      color: #f7f2e9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .preview-nav {
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      background: rgba(250, 248, 244, .88);
+    }
+    .preview-brand {
+      font-weight: 700;
+      font-size: .84rem;
+      font-family: Georgia, serif;
+    }
+    .preview-nav-btn {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: .68rem;
+      font-weight: 600;
+      background: #bd5137;
+      color: white;
+    }
+    .preview-hero {
+      padding: 14px 12px;
+      background: linear-gradient(120deg, #fbf8f2, #f5efe4);
+    }
+    .preview-eyebrow {
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #bd5137;
+      margin-bottom: 4px;
+    }
+    .preview-title {
+      font: 1.25rem/1.12 Georgia, serif;
+      color: #181916;
+      margin: 4px 0 6px;
+    }
+    .preview-title em {
+      color: #bd5137;
+      font-style: italic;
+    }
+    .preview-desc {
+      font-size: .74rem;
+      line-height: 1.4;
+      color: #686a64;
       margin-bottom: 10px;
     }
-
-    .popup-title {
-      margin: 0;
-      font-size: 1.02rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
+    .preview-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
     }
-
-    .popup-close {
-      border: none;
-      background: rgba(148, 163, 184, 0.08);
-      color: var(--text);
+    .preview-btn-primary {
+      display: inline-block;
+      border-radius: 20px;
+      background: #bd5137;
+      color: white;
+      padding: 5px 10px;
+      font-size: .7rem;
+      font-weight: 600;
+    }
+    .preview-btn-sec {
+      display: inline-block;
+      border-radius: 20px;
+      border: 1px solid rgba(24, 25, 22, .2);
+      color: #181916;
+      padding: 5px 9px;
+      font-size: .7rem;
+      font-weight: 600;
+    }
+    .preview-card-box {
+      margin: 10px 12px;
+      padding: 10px 12px;
       border-radius: 10px;
-      width: 32px;
-      height: 32px;
+      border: 1px solid rgba(24, 25, 22, .09);
+      background: rgba(255, 255, 255, .7);
+    }
+    .prev-card-index {
+      font-size: .65rem;
+      font-family: Georgia, serif;
+      color: #bd5137;
+    }
+    .prev-card-title {
+      font-size: .95rem;
+      font-family: Georgia, serif;
+      margin: 4px 0 2px;
+      color: #181916;
+    }
+    .prev-card-link {
+      font-size: .7rem;
+      font-weight: 600;
+      color: #963b2b;
+    }
+    .preview-footer {
+      padding: 8px 12px;
+      font-size: .65rem;
+      text-align: center;
+      border-top: 1px solid rgba(24, 25, 22, .08);
+      color: #777971;
+    }
+    .preview-footer a { color: #bd5137; text-decoration: none; }
+
+    .buttons { display: grid; gap: 9px; }
+    .buttons button {
+      min-height: 46px;
+      border: 0;
+      border-radius: 9px;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
       cursor: pointer;
-      font-size: 1.1rem;
+      padding: 10px;
     }
-
-    .popup-message {
-      margin: 0 0 12px;
-      color: var(--muted);
-      line-height: 1.5;
-      font-size: 0.92rem;
+    .buttons .reset {
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--ink);
     }
+    button:disabled { opacity: .6; cursor: wait; }
+    #saveStatus { min-height: 22px; color: var(--good); font-size: .87rem; }
 
-    .popup-progress {
-      width: 100%;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, 0.12);
-      overflow: hidden;
-      border: 1px solid rgba(148, 163, 184, 0.12);
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { position: static; grid-row: 1; grid-template-columns: 1fr; }
+      .themes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .color-grid { grid-template-columns: 1fr; }
     }
-
-    .popup-progress span {
-      display: block;
-      width: 0%;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, var(--primary-2), var(--primary));
-      transition: width 0.2s ease;
-    }
-
-    @media (max-width: 760px) {
-      body { padding: 18px; }
-      .topbar, .stats, .files-panel { padding-left: 16px; padding-right: 16px; }
-      .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .toolbar {
-        width: 100%;
-      }
-      .toolbar button { flex: 1; }
-      .stats { grid-template-columns: 1fr; }
-      .upload-form { flex-direction: column; align-items: stretch; }
-      button { width: 100%; }
-      .file-row { align-items: flex-start; }
+    @media (max-width: 560px) {
+      main { width: calc(100% - 22px); margin: 20px auto 40px; }
+      .top { padding: 13px 12px; }
+      .top strong { font-size: .78rem; }
+      .heading { align-items: start; flex-direction: column; }
+      .heading #connection { text-align: left; }
+      .panel, .sidebox { padding: 17px 13px; }
+      .themes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .fields { grid-template-columns: 1fr; gap: 11px; }
+      .fields label:has(textarea) { grid-column: auto; }
     }
   </style>
 </head>
 <body>
-  <div class="custom-popup" id="uploadPopup" role="alert">
-    <div class="popup-header">
-      <h3 class="popup-title" id="popupTitle">Upload status</h3>
-      <button class="popup-close" id="closePopup" type="button" aria-label="Close popup">×</button>
+  <header class="top">
+    <strong>SRI PUTHIYAVAN · SUPERADMIN</strong>
+    <div style="display:flex; gap:14px; align-items:center;">
+      <a href="mano.html">Admin Portal</a>
+      <a href="index.html">Open storefront ↗</a>
     </div>
-    <p class="popup-message" id="popupMessage">Waiting for file selection.</p>
-    <div class="popup-progress"><span id="popupProgressBar"></span></div>
-  </div>
+  </header>
+  <main>
+    <div class="heading">
+      <div>
+        <h1>Storefront controls</h1>
+        <p>Customize the colors and content of all elements on your home page.</p>
+      </div>
+      <div id="connection" role="status">Loading settings…</div>
+    </div>
+    
+    <div class="layout">
+      <div class="controls">
+        
+        <!-- Themes and Granular Colour Palette -->
+        <section class="panel">
+          <h2>Themes &amp; Element Colors</h2>
+          <p class="help">Choose a theme preset to style all elements at once, or fine-tune individual colors below.</p>
+          
+          <div class="themes" aria-label="Theme presets">
+            <button type="button" class="theme" data-theme="classic" style="--swatch:linear-gradient(90deg,#faf8f4 50%,#bd5137 50%)" aria-pressed="true">Sivakasi classic</button>
+            <button type="button" class="theme" data-theme="violet" style="--swatch:linear-gradient(90deg,#f5f1fa 50%,#7043a3 50%)" aria-pressed="false">Festive violet</button>
+            <button type="button" class="theme" data-theme="green" style="--swatch:linear-gradient(90deg,#f3f6ed 50%,#397457 50%)" aria-pressed="false">Garden green</button>
+            <button type="button" class="theme" data-theme="sunset" style="--swatch:linear-gradient(90deg,#fff4e7 50%,#d26b2f 50%)" aria-pressed="false">Warm sunset</button>
+            <button type="button" class="theme" data-theme="midnight" style="--swatch:linear-gradient(90deg,#1a1a2e 50%,#16213e 50%)" aria-pressed="false">Midnight dark</button>
+            <button type="button" class="theme" data-theme="ocean" style="--swatch:linear-gradient(90deg,#e0f2fe 50%,#0284c7 50%)" aria-pressed="false">Ocean blue</button>
+            <button type="button" class="theme" data-theme="rose" style="--swatch:linear-gradient(90deg,#fdf2f8 50%,#e11d48 50%)" aria-pressed="false">Rose pink</button>
+            <button type="button" class="theme" data-theme="amber" style="--swatch:linear-gradient(90deg,#fffbeb 50%,#f59e0b 50%)" aria-pressed="false">Golden amber</button>
+            <button type="button" class="theme" data-theme="forest" style="--swatch:linear-gradient(90deg,#ecfdf5 50%,#065f46 50%)" aria-pressed="false">Forest deep</button>
+            <button type="button" class="theme" data-theme="lavender" style="--swatch:linear-gradient(90deg,#faf5ff 50%,#a855f7 50%)" aria-pressed="false">Lavender dream</button>
+            <button type="button" class="theme" data-theme="coral" style="--swatch:linear-gradient(90deg,#fff7ed 50%,#f97316 50%)" aria-pressed="false">Coral reef</button>
+            <button type="button" class="theme" data-theme="slate" style="--swatch:linear-gradient(90deg,#f1f5f9 50%,#475569 50%)" aria-pressed="false">Slate gray</button>
+            <button type="button" class="theme" data-theme="terracotta" style="--swatch:linear-gradient(90deg,#fef7ee 50%,#c2410c 50%)" aria-pressed="false">Terracotta</button>
+            <button type="button" class="theme" data-theme="mint" style="--swatch:linear-gradient(90deg,#f0fdf4 50%,#22c55e 50%)" aria-pressed="false">Fresh mint</button>
+            <button type="button" class="theme" data-theme="gold" style="--swatch:linear-gradient(90deg,#fefce8 50%,#ca8a04 50%)" aria-pressed="false">Luxury gold</button>
+            <button type="button" class="theme" data-theme="cherry" style="--swatch:linear-gradient(90deg,#fef2f2 50%,#dc2626 50%)" aria-pressed="false">Cherry red</button>
+            <button type="button" class="theme" data-theme="teal" style="--swatch:linear-gradient(90deg,#f0fdfa 50%,#0d9488 50%)" aria-pressed="false">Teal waters</button>
+            <button type="button" class="theme" data-theme="plum" style="--swatch:linear-gradient(90deg,#faf5ff 50%,#9333ea 50%)" aria-pressed="false">Royal plum</button>
+            <button type="button" class="theme" data-theme="sand" style="--swatch:linear-gradient(90deg,#fdf8f3 50%,#d4a574 50%)" aria-pressed="false">Desert sand</button>
+          </div>
 
-  <div class="container">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-mark">A</div>
-        <div>
-          <p class="eyebrow">Control center</p>
-          <h1>Root File Replacement Admin</h1>
-        </div>
+          <!-- Section filter navigation & search -->
+          <div class="color-nav" id="colorTabs">
+            <button type="button" class="color-tab active" data-filter="all">All Sections (50)</button>
+            <button type="button" class="color-tab" data-filter="global">🌐 Global</button>
+            <button type="button" class="color-tab" data-filter="announcement">📢 Announcement</button>
+            <button type="button" class="color-tab" data-filter="header">🧭 Header &amp; Nav</button>
+            <button type="button" class="color-tab" data-filter="hero">🌟 Hero Banner</button>
+            <button type="button" class="color-tab" data-filter="catalog">📦 Catalogue</button>
+            <button type="button" class="color-tab" data-filter="story">📖 Story &amp; Values</button>
+            <button type="button" class="color-tab" data-filter="contact">📞 Contact</button>
+            <button type="button" class="color-tab" data-filter="gallery">🖼️ Gallery</button>
+            <button type="button" class="color-tab" data-filter="footer">📄 Footer</button>
+          </div>
+
+          <input type="text" id="colorSearch" class="color-search" placeholder="🔍 Search color controls by name (e.g. background, button, link, heading)..." />
+
+          <!-- Dynamic Container for All Color Groups -->
+          <div id="colorContainer"></div>
+        </section>
+
+        <!-- Page Width Panel -->
+        <section class="panel">
+          <h2>Page width</h2>
+          <p class="help">Set the maximum width for the main page sections. Mobile layouts stay fluid.</p>
+          <label for="width">Maximum content width</label>
+          <div class="range">
+            <input id="width" type="range" min="720" max="1600" step="10" value="1240">
+            <output id="widthOutput">1240 px</output>
+          </div>
+        </section>
+
+        <!-- Copy Fields Panels -->
+        <section class="panel">
+          <h2>Header and hero</h2>
+          <p class="help">Edit the announcement, navigation labels and introduction.</p>
+          <div class="fields" id="headerFields"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Collection section</h2>
+          <p class="help">Edit the collection heading and all three catalogue cards.</p>
+          <div class="fields" id="catalogFields"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Our story</h2>
+          <p class="help">Edit the story text and supporting points.</p>
+          <div class="fields" id="storyFields"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Contact, gallery and footer</h2>
+          <p class="help">Edit contact labels and displayed details, plus the gallery and footer copy.</p>
+          <div class="fields" id="closingFields"></div>
+        </section>
+
       </div>
 
-      <div class="toolbar">
-        <button type="button" class="ghost">Live Sync</button>
-        <button type="button" class="primary">Publish Updates</button>
-      </div>
-    </header>
-
-    <section class="stats" aria-label="Summary overview">
-      <article class="stat">
-        <span class="label">Files managed</span>
-        <span class="number">08</span>
-        <span class="delta">+2 this week</span>
-      </article>
-      <article class="stat">
-        <span class="label">Uploads ready</span>
-        <span class="number">100%</span>
-        <span class="delta">Secure queue</span>
-      </article>
-      <article class="stat">
-        <span class="label">System health</span>
-        <span class="number">Stable</span>
-        <span class="delta">Low risk</span>
-      </article>
-    </section>
-
-    <section class="files-panel">
-      <div class="panel-header">
-        <h2>Root Asset Registry</h2>
-        <span>Secure upload</span>
-      </div>
-
-      <div class="files">
-        <div class="file-card">
-          <div class="file-row">
-            <div class="file-main">
-              <div class="file-icon">XLS</div>
-              <div class="file-name">products.xlsx</div>
-            </div>
-            <span class="file-tag">Spreadsheet</span>
+      <!-- Sticky Live Preview & Save Buttons -->
+      <aside>
+        <div class="preview" id="storePreview">
+          <!-- Announcement preview -->
+          <div class="preview-announcement" id="prevAnnounce">Sri Puthiyavan Crackers · Sivakasi · Est. 2024</div>
+          
+          <!-- Header preview -->
+          <div class="preview-nav" id="prevNav">
+            <span class="preview-brand" id="previewBrand">Sri Puthiyavan Crackers</span>
+            <span class="preview-nav-btn" id="prevNavBtn">Order online</span>
           </div>
-          <form class="upload-form" data-target="products.xlsx" enctype="multipart/form-data">
-            <input type="file" name="replacement" accept=".xlsx,.xls" required />
-            <button type="submit">Replace File</button>
-          </form>
-          <div class="status"></div>
+
+          <!-- Hero preview -->
+          <div class="preview-hero" id="prevHero">
+            <div class="preview-eyebrow" id="prevEyebrow">Made for celebrations</div>
+            <div class="preview-title" id="previewTitle">Make room for <em id="prevTitleEm">magic</em>.</div>
+            <div class="preview-desc" id="previewDescription">Thoughtfully chosen fireworks for your celebrations.</div>
+            <div class="preview-actions">
+              <span class="preview-btn-primary" id="prevBtnPrimary">Explore &amp; order ↗</span>
+              <span class="preview-btn-sec" id="prevBtnSec">Price list</span>
+            </div>
+          </div>
+
+          <!-- Catalogue card sample preview -->
+          <div class="preview-card-box" id="prevCardBox">
+            <div class="prev-card-index" id="prevCardIndex">01 / Discover</div>
+            <div class="prev-card-title" id="prevCardTitle">Curated collection</div>
+            <div class="prev-card-link" id="prevCardLink">View catalogue →</div>
+          </div>
+
+          <!-- Footer preview -->
+          <div class="preview-footer" id="prevFooter">
+            <span>© 2026 Sri Puthiyavan Crackers · <a href="#" id="prevFootLink">Get in touch</a></span>
+          </div>
         </div>
 
-        <div class="file-card">
-          <div class="file-row">
-            <div class="file-main">
-              <div class="file-icon">IMG</div>
-              <div class="file-name">Card1.jpg</div>
-            </div>
-            <span class="file-tag">Image</span>
-          </div>
-          <form class="upload-form" data-target="Card1.jpg" enctype="multipart/form-data">
-            <input type="file" name="replacement" accept="image/*" required />
-            <button type="submit">Replace File</button>
-          </form>
-          <div class="status"></div>
+        <div class="sidebox buttons">
+          <button type="button" id="save">Save and publish</button>
+          <button type="button" class="reset" id="reset">Reset to original</button>
+          <div id="saveStatus" role="status" aria-live="polite"></div>
         </div>
-
-        <div class="file-card">
-          <div class="file-row">
-            <div class="file-main">
-              <div class="file-icon">IMG</div>
-              <div class="file-name">Card2.jpg</div>
-            </div>
-            <span class="file-tag">Image</span>
-          </div>
-          <form class="upload-form" data-target="Card2.jpg" enctype="multipart/form-data">
-            <input type="file" name="replacement" accept="image/*" required />
-            <button type="submit">Replace File</button>
-          </form>
-          <div class="status"></div>
-        </div>
-
-        <div class="file-card">
-          <div class="file-row">
-            <div class="file-main">
-              <div class="file-icon">PDF</div>
-              <div class="file-name">catalog.pdf</div>
-            </div>
-            <span class="file-tag">PDF</span>
-          </div>
-          <form class="upload-form" data-target="catalog.pdf" enctype="multipart/form-data">
-            <input type="file" name="replacement" accept="application/pdf" required />
-            <button type="submit">Replace File</button>
-          </form>
-          <div class="status"></div>
-        </div>
-
-        <div class="file-card">
-          <div class="file-row">
-            <div class="file-main">
-              <div class="file-icon">PDF</div>
-              <div class="file-name">PriceList.pdf</div>
-            </div>
-            <span class="file-tag">PDF</span>
-          </div>
-          <form class="upload-form" data-target="PriceList.pdf" enctype="multipart/form-data">
-            <input type="file" name="replacement" accept="application/pdf" required />
-            <button type="submit">Replace File</button>
-          </form>
-          <div class="status"></div>
-        </div>
-
-        <div class="file-card">
-          <div class="file-row">
-            <div class="file-main">
-              <div class="file-icon">HTML</div>
-              <div class="file-name">index.html</div>
-            </div>
-            <span class="file-tag">Page</span>
-          </div>
-          <form class="upload-form" data-target="index.html" enctype="multipart/form-data">
-            <input type="file" name="replacement" accept=".html,.htm" required />
-            <button type="submit">Replace File</button>
-          </form>
-          <div class="status"></div>
-        </div>
-
-        <div class="file-card">
-          <div class="file-row">
-            <div class="file-main">
-              <div class="file-icon">PNG</div>
-              <div class="file-name">Logo.png</div>
-            </div>
-            <span class="file-tag">Image</span>
-          </div>
-          <form class="upload-form" data-target="Logo.png" enctype="multipart/form-data">
-            <input type="file" name="replacement" accept="image/png" required />
-            <button type="submit">Replace File</button>
-          </form>
-          <div class="status"></div>
-        </div>
-
-        <div class="file-card">
-          <div class="file-row">
-            <div class="file-main">
-              <div class="file-icon">ADM</div>
-              <div class="file-name">AdminMano.html</div>
-            </div>
-            <span class="file-tag">Admin Page</span>
-          </div>
-          <form class="upload-form" data-target="AdminMano.html" enctype="multipart/form-data">
-            <input type="file" name="replacement" accept=".html,.htm" required />
-            <button type="submit">Replace File</button>
-          </form>
-          <div class="status"></div>
-        </div>
-      </div>
-    </section>
-  </div>
+      </aside>
+    </div>
+  </main>
 
   <script>
-    const allowedTypes = {
-      'products.xlsx': { ext: ['.xlsx', '.xls'], mime: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'] },
-      'Card1.jpg': { ext: ['.jpg', '.jpeg', '.png'], mime: ['image/jpeg', 'image/png'] },
-      'Card2.jpg': { ext: ['.jpg', '.jpeg', '.png'], mime: ['image/jpeg', 'image/png'] },
-      'catalog.pdf': { ext: ['.pdf'], mime: ['application/pdf'] },
-      'PriceList.pdf': { ext: ['.pdf'], mime: ['application/pdf'] },
-      'index.html': { ext: ['.html', '.htm'], mime: ['text/html'] },
-      'Logo.png': { ext: ['.png'], mime: ['image/png'] },
-      'AdminMano.html': { ext: ['.html', '.htm'], mime: ['text/html'] }
+    const endpoint = '/api/site-settings.php';
+
+    // Base palettes for presets
+    const palettes = {
+      classic:    { paper: '#faf8f4', ink: '#181916', muted: '#686a64', accent: '#bd5137', accentDark: '#963b2b', gold: '#d99c48' },
+      violet:     { paper: '#f5f1fa', ink: '#211b29', muted: '#70677b', accent: '#7043a3', accentDark: '#513078', gold: '#d7a44a' },
+      green:      { paper: '#f3f6ed', ink: '#1b241e', muted: '#68766c', accent: '#397457', accentDark: '#28543e', gold: '#c79a4c' },
+      sunset:     { paper: '#fff4e7', ink: '#2b211b', muted: '#79695c', accent: '#d26b2f', accentDark: '#a84920', gold: '#e2ad47' },
+      midnight:   { paper: '#0f0f1a', ink: '#e8e8e8', muted: '#8b8b9a', accent: '#3b82f6', accentDark: '#2563eb', gold: '#fbbf24' },
+      ocean:      { paper: '#e0f2fe', ink: '#0c1a2a', muted: '#4a6a8a', accent: '#0284c7', accentDark: '#0369a1', gold: '#f59e0b' },
+      rose:       { paper: '#fdf2f8', ink: '#2d1b1f', muted: '#8a5a63', accent: '#e11d48', accentDark: '#be123c', gold: '#f59e0b' },
+      amber:      { paper: '#fffbeb', ink: '#2d2400', muted: '#8a7a4a', accent: '#f59e0b', accentDark: '#d97706', gold: '#fbbf24' },
+      forest:     { paper: '#ecfdf5', ink: '#0f1a12', muted: '#4a7a5a', accent: '#065f46', accentDark: '#044d3a', gold: '#f59e0b' },
+      lavender:   { paper: '#faf5ff', ink: '#1e1a2e', muted: '#7a6a8a', accent: '#a855f7', accentDark: '#9333ea', gold: '#f59e0b' },
+      coral:      { paper: '#fff7ed', ink: '#2d1a0f', muted: '#8a6a4a', accent: '#f97316', accentDark: '#ea580c', gold: '#fbbf24' },
+      slate:      { paper: '#f1f5f9', ink: '#0f172a', muted: '#64748b', accent: '#475569', accentDark: '#334155', gold: '#f59e0b' },
+      terracotta: { paper: '#fef7ee', ink: '#2d1a0f', muted: '#8a6a4a', accent: '#c2410c', accentDark: '#9a3412', gold: '#fbbf24' },
+      mint:       { paper: '#f0fdf4', ink: '#0f1a0f', muted: '#4a7a4a', accent: '#22c55e', accentDark: '#16a34a', gold: '#f59e0b' },
+      gold:       { paper: '#fefce8', ink: '#2d2400', muted: '#8a7a4a', accent: '#ca8a04', accentDark: '#a16207', gold: '#fbbf24' },
+      cherry:     { paper: '#fef2f2', ink: '#2d0f0f', muted: '#8a4a4a', accent: '#dc2626', accentDark: '#b91c1c', gold: '#fbbf24' },
+      teal:       { paper: '#f0fdfa', ink: '#0f1a1a', muted: '#4a7a7a', accent: '#0d9488', accentDark: '#0f766e', gold: '#f59e0b' },
+      plum:       { paper: '#faf5ff', ink: '#1e1a2e', muted: '#7a6a8a', accent: '#9333ea', accentDark: '#7e22ce', gold: '#fbbf24' },
+      sand:       { paper: '#fdf8f3', ink: '#2d241a', muted: '#8a7a6a', accent: '#d4a574', accentDark: '#b8925a', gold: '#f59e0b' }
     };
 
-    const popup = document.getElementById('uploadPopup');
-    const popupTitle = document.getElementById('popupTitle');
-    const popupMessage = document.getElementById('popupMessage');
-    const popupProgress = document.getElementById('popupProgressBar');
-    const popupClose = document.getElementById('closePopup');
-
-    function showPopup(type, title, message, percent = 0) {
-      popup.classList.remove('success', 'error');
-      popup.classList.add(type, 'show');
-      popupTitle.textContent = title;
-      popupMessage.textContent = message;
-      popupProgress.style.width = `${Math.max(0, Math.min(100, percent))}%`;
-    }
-
-    function hidePopup() {
-      popup.classList.remove('show');
-    }
-
-    popupClose.addEventListener('click', hidePopup);
-
-    function validateFileType(file, targetFile) {
-      const rule = allowedTypes[targetFile];
-      if (!rule) {
-        return { ok: true };
+    // Granular Color Customization Definition for ALL elements on index page
+    const colorSections = [
+      {
+        id: 'global',
+        title: '🌐 Global & Base Palette',
+        desc: 'Core background, body text, lines and primary accents',
+        colors: [
+          ['paper', 'Page background', '#faf8f4'],
+          ['ink', 'Main text & headings', '#181916'],
+          ['muted', 'Muted secondary text', '#686a64'],
+          ['line', 'Borders and dividers', '#e5e5df'],
+          ['accent', 'Primary brand accent', '#bd5137'],
+          ['accentDark', 'Accent hover / dark', '#963b2b'],
+          ['gold', 'Highlight / focus gold', '#d99c48']
+        ]
+      },
+      {
+        id: 'announcement',
+        title: '📢 Announcement Bar',
+        desc: 'Top marquee banner colors',
+        colors: [
+          ['announcementBg', 'Banner background', '#23251f'],
+          ['announcementText', 'Banner text color', '#f7f2e9']
+        ]
+      },
+      {
+        id: 'header',
+        title: '🧭 Header & Navigation',
+        desc: 'Top navbar, brand, navigation links and "Order" button',
+        colors: [
+          ['headerBg', 'Navbar background', '#faf8f4'],
+          ['headerBorder', 'Navbar bottom border', '#e5e5df'],
+          ['navLink', 'Nav links text', '#52534e'],
+          ['navLinkHover', 'Nav links hover color', '#bd5137'],
+          ['navBtnBg', '"Order" button background', '#bd5137'],
+          ['navBtnText', '"Order" button text', '#ffffff']
+        ]
+      },
+      {
+        id: 'hero',
+        title: '🌟 Hero Banner',
+        desc: 'Main banner heading, buttons, descriptions and decorative badge',
+        colors: [
+          ['heroBg', 'Hero banner background', '#fbf8f2'],
+          ['heroEyebrow', 'Hero eyebrow text', '#bd5137'],
+          ['heroTitle', 'Main headline text', '#181916'],
+          ['heroTitleAccent', 'Headline italic accent word', '#bd5137'],
+          ['heroText', 'Hero description text', '#686a64'],
+          ['heroBtnPrimaryBg', 'Primary button background', '#bd5137'],
+          ['heroBtnPrimaryText', 'Primary button text', '#ffffff'],
+          ['heroBtnSecondaryBorder', 'Secondary button border', '#181916'],
+          ['heroBtnSecondaryText', 'Secondary button text', '#181916'],
+          ['heroStamp', 'Hero circular stamp badge', '#bd5137']
+        ]
+      },
+      {
+        id: 'catalog',
+        title: '📦 Catalogue & Cards',
+        desc: 'Collection section background, cards, labels, titles and links',
+        colors: [
+          ['catalogBg', 'Section background', '#f4f0e8'],
+          ['catalogCardBg', 'Card background', '#ffffff'],
+          ['catalogCardBorder', 'Card border', '#e5e5df'],
+          ['catalogCardIndex', 'Card index number (01/)', '#bd5137'],
+          ['catalogCardTitle', 'Card title heading', '#181916'],
+          ['catalogCardText', 'Card description text', '#686a64'],
+          ['catalogCardLink', 'Card action link ("View →")', '#963b2b']
+        ]
+      },
+      {
+        id: 'story',
+        title: '📖 Our Story & Values',
+        desc: 'Tradition narrative, Tamil quote and brand values points',
+        colors: [
+          ['storyBg', 'Section background', '#faf8f4'],
+          ['storyText', 'Story body text', '#686a64'],
+          ['storyTamil', 'Tamil quote text', '#4e504a'],
+          ['storyValueHeading', 'Value point title', '#181916'],
+          ['storyValueText', 'Value point description', '#686a64']
+        ]
+      },
+      {
+        id: 'contact',
+        title: '📞 Contact Details Section',
+        desc: 'Bottom contact band, headings, WhatsApp and social links',
+        colors: [
+          ['contactBg', 'Contact band background', '#24261f'],
+          ['contactTitle', 'Section heading text', '#f8f4ed'],
+          ['contactEyebrow', 'Eyebrow tag text', '#e1ab61'],
+          ['contactText', 'Description text', '#c5c4bd'],
+          ['contactLink', 'Contact details links', '#f8f4ed'],
+          ['contactLabel', 'Contact detail labels', '#aaa99f']
+        ]
+      },
+      {
+        id: 'gallery',
+        title: '🖼️ Gallery Section',
+        desc: 'Celebration photos and zoom buttons',
+        colors: [
+          ['galleryBg', 'Section background', '#faf8f4'],
+          ['galleryCardBg', 'Photo card background', '#f1ead8'],
+          ['galleryBtnBg', 'Zoom button background', '#23251f']
+        ]
+      },
+      {
+        id: 'footer',
+        title: '📄 Footer',
+        desc: 'Bottom copyright bar, links and borders',
+        colors: [
+          ['footerBg', 'Footer background', '#faf8f4'],
+          ['footerText', 'Copyright text', '#777971'],
+          ['footerLink', 'Footer link text', '#bd5137'],
+          ['footerBorder', 'Footer top border', '#e5e5df']
+        ]
       }
+    ];
 
-      const uploadedExt = `.${(file.name.split('.').pop() || '').toLowerCase()}`;
-      const mime = (file.type || '').toLowerCase();
-      const extOK = rule.ext.includes(uploadedExt);
-      const mimeOK = !rule.mime.length || rule.mime.includes(mime);
+    // Build theme full palette from base
+    function getThemeFullColors(themeKey) {
+      const base = palettes[themeKey] || palettes.classic;
+      const isDark = (themeKey === 'midnight');
+      return {
+        paper: base.paper,
+        ink: base.ink,
+        muted: base.muted,
+        line: isDark ? '#232338' : '#e5e5df',
+        accent: base.accent,
+        accentDark: base.accentDark,
+        gold: base.gold,
 
-      if (!extOK && !mimeOK) {
-        return {
-          ok: false,
-          message: `Invalid file type for ${targetFile}. Allowed: ${rule.ext.join(', ')}`
-        };
-      }
+        announcementBg: isDark ? '#070710' : '#23251f',
+        announcementText: '#f7f2e9',
 
-      return { ok: true };
+        headerBg: base.paper,
+        headerBorder: isDark ? '#232338' : '#e5e5df',
+        navLink: base.muted,
+        navLinkHover: base.accent,
+        navBtnBg: base.accent,
+        navBtnText: '#ffffff',
+
+        heroBg: base.paper,
+        heroEyebrow: base.accent,
+        heroTitle: base.ink,
+        heroTitleAccent: base.accent,
+        heroText: base.muted,
+        heroBtnPrimaryBg: base.accent,
+        heroBtnPrimaryText: '#ffffff',
+        heroBtnSecondaryBorder: isDark ? base.accent : base.ink,
+        heroBtnSecondaryText: base.ink,
+        heroStamp: base.accent,
+
+        catalogBg: isDark ? '#141424' : '#f4f0e8',
+        catalogCardBg: isDark ? '#1a1a2e' : '#ffffff',
+        catalogCardBorder: isDark ? '#282845' : '#e5e5df',
+        catalogCardIndex: base.accent,
+        catalogCardTitle: base.ink,
+        catalogCardText: base.muted,
+        catalogCardLink: base.accentDark,
+
+        storyBg: base.paper,
+        storyText: base.muted,
+        storyTamil: base.ink,
+        storyValueHeading: base.ink,
+        storyValueText: base.muted,
+
+        contactBg: isDark ? '#070710' : '#24261f',
+        contactTitle: '#f8f4ed',
+        contactEyebrow: base.gold,
+        contactText: '#c5c4bd',
+        contactLink: '#f8f4ed',
+        contactLabel: '#aaa99f',
+
+        galleryBg: base.paper,
+        galleryCardBg: isDark ? '#1a1a2e' : '#f1ead8',
+        galleryBtnBg: isDark ? base.accent : '#23251f',
+
+        footerBg: isDark ? '#070710' : base.paper,
+        footerText: base.muted,
+        footerLink: base.accent,
+        footerBorder: isDark ? '#232338' : '#e5e5df'
+      };
     }
 
-    document.querySelectorAll('.upload-form').forEach((form) => {
-      form.addEventListener('submit', (event) => {
-        event.preventDefault();
+    // Copy groups
+    const groups = {
+      headerFields: [
+        ['announcement','Announcement'],
+        ['brand','Brand name'],
+        ['navCollection','Collection navigation'],
+        ['navStory','Story navigation'],
+        ['navVisit','Visit navigation'],
+        ['navOrder','Order button'],
+        ['heroEyebrow','Hero eyebrow'],
+        ['heroTitle','Hero heading'],
+        ['heroDescription','Hero description','area'],
+        ['heroPrimary','Primary button'],
+        ['heroSecondary','Secondary button'],
+        ['heroNote','Hero note']
+      ],
+      catalogFields: [
+        ['catalogEyebrow','Section eyebrow'],
+        ['catalogTitle','Section heading'],
+        ['catalogDescription','Section description','area'],
+        ['catalogCard1Index','Card 1 label'],
+        ['catalogCard1Title','Card 1 title'],
+        ['catalogCard1Text','Card 1 description','area'],
+        ['catalogCard1Link','Card 1 link'],
+        ['catalogCard2Index','Card 2 label'],
+        ['catalogCard2Title','Card 2 title'],
+        ['catalogCard2Text','Card 2 description','area'],
+        ['catalogCard2Link','Card 2 link'],
+        ['catalogCard3Index','Card 3 label'],
+        ['catalogCard3Title','Card 3 title'],
+        ['catalogCard3Text','Card 3 description','area'],
+        ['catalogCard3Link','Card 3 link']
+      ],
+      storyFields: [
+        ['storyEyebrow','Section eyebrow'],
+        ['storyTitle','Section heading'],
+        ['storyText1','Story paragraph 1','area'],
+        ['storyText2','Story paragraph 2','area'],
+        ['storyTamil','Tamil text','area'],
+        ['value1Title','Point 1 heading'],
+        ['value1Text','Point 1 description','area'],
+        ['value2Title','Point 2 heading'],
+        ['value2Text','Point 2 description','area'],
+        ['value3Title','Point 3 heading'],
+        ['value3Text','Point 3 description','area']
+      ],
+      closingFields: [
+        ['contactEyebrow','Contact eyebrow'],
+        ['contactTitle','Contact heading'],
+        ['contactDescription','Contact description','area'],
+        ['contactLabel1','Contact 1 label'],
+        ['contactValue1','Contact 1 displayed detail'],
+        ['contactLabel2','Contact 2 label'],
+        ['contactValue2','Contact 2 displayed detail'],
+        ['contactLabel3','Contact 3 label'],
+        ['contactValue3','Contact 3 displayed detail'],
+        ['contactLabel4','Contact 4 label'],
+        ['contactValue4','Contact 4 displayed detail'],
+        ['galleryEyebrow','Gallery eyebrow'],
+        ['galleryTitle','Gallery heading'],
+        ['footerBrand','Footer brand'],
+        ['footerRights','Footer message'],
+        ['footerLink','Footer link label']
+      ]
+    };
 
-        const fileInput = form.querySelector('input[type="file"]');
-        const statusBox = form.parentElement.querySelector('.status');
-        const targetFile = form.dataset.target;
+    // Default site copy extracted from index.html
+    const DEFAULT_STORE_COPY = {
+      // Header and hero
+      announcement: "Sri Puthiyavan Crackers · Sivakasi · Est. 2024",
+      brand: "Sri Puthiyavan Crackers",
+      navCollection: "Collection",
+      navStory: "Our story",
+      navVisit: "Visit us",
+      navOrder: "Order now",
+      heroEyebrow: "A little more wonder",
+      heroTitle: "Make room for magic.",
+      heroDescription: "Thoughtfully chosen fireworks for the moments that bring everyone together. Celebrate your way, with a little extra sparkle.",
+      heroPrimary: "Explore & order",
+      heroSecondary: "Discover our collection",
+      heroNote: "Rooted in Sivakasi. Made for your celebrations.",
 
-        if (!fileInput.files || !fileInput.files[0]) {
-          statusBox.textContent = 'Please choose a file first.';
-          statusBox.className = 'status error';
-          showPopup('error', 'Missing file', 'Please select a file before uploading.', 100);
-          return;
-        }
+      // Collection section
+      catalogEyebrow: "The collection",
+      catalogTitle: "Find your kind of celebration.",
+      catalogDescription: "Take a closer look at our catalogue, browse the latest prices, or go straight to building your order.",
+      catalogCard1Index: "01 / Browse",
+      catalogCard1Title: "Product catalogue",
+      catalogCard1Text: "Explore the collection and find something for every kind of gathering.",
+      catalogCard1Link: "View catalogue",
+      catalogCard2Index: "02 / Discover",
+      catalogCard2Title: "Price list",
+      catalogCard2Text: "See the current list before you start planning your celebration.",
+      catalogCard2Link: "View prices",
+      catalogCard3Index: "03 / Make it yours",
+      catalogCard3Title: "Place an order",
+      catalogCard3Text: "Choose your favourites and send your order directly to our team.",
+      catalogCard3Link: "Start an order",
 
-        const file = fileInput.files[0];
-        const validation = validateFileType(file, targetFile);
+      // Our story
+      storyEyebrow: "A tradition of togetherness",
+      storyTitle: "Made for the moments that matter.",
+      storyText1: "Sri Puthiyavan is a family-minded cracker shop in Sivakasi, bringing a thoughtful selection, warm service and a love of celebration to every occasion.",
+      storyText2: "From familiar favourites to something new, we’re here to help you find the right way to make a good moment feel unforgettable.",
+      storyTamil: "தரம், பாரம்பரியம் மற்றும் அன்பான சேவையுடன் உங்கள் கொண்டாட்டங்களுக்கு மகிழ்ச்சியும் ஒளியும் சேர்க்கிறோம்.",
+      value1Title: "From Sivakasi",
+      value1Text: "A hometown connection to a much-loved tradition.",
+      value2Title: "Here to help",
+      value2Text: "Friendly support when you’re choosing your favourites.",
+      value3Title: "Celebrate thoughtfully",
+      value3Text: "Make space for family, neighbours and a little wonder.",
 
-        if (!validation.ok) {
-          statusBox.textContent = validation.message;
-          statusBox.className = 'status error';
-          showPopup('error', 'Invalid file type', validation.message, 100);
-          return;
-        }
+      // Contact, gallery and footer
+      contactEyebrow: "We’d love to hear from you",
+      contactTitle: "Let’s make your next celebration brighter.",
+      contactDescription: "Questions, a little help with your order, or just saying hello — reach out and our team will be happy to help.",
+      contactLabel1: "Orders & WhatsApp",
+      contactValue1: "+91 90033 57888",
+      contactLabel2: "Enquiries",
+      contactValue2: "+91 96775 39254",
+      contactLabel3: "Find us",
+      contactValue3: "Sivakasi, Tamil Nadu",
+      contactLabel4: "Follow along",
+      contactValue4: "@Sri_puthiyavan",
+      galleryEyebrow: "A glimpse of the festivities",
+      galleryTitle: "Little details. Big memories.",
+      footerBrand: "Sri Puthiyavan Crackers",
+      footerRights: "All rights reserved.",
+      footerLink: "Get in touch"
+    };
 
-        statusBox.textContent = 'Uploading...';
-        statusBox.className = 'status';
-        showPopup('success', `Uploading ${targetFile}`, 'Uploading in progress. Please wait...', 5);
+    let originalCopy = { ...DEFAULT_STORE_COPY };
 
-        const formData = new FormData();
-        formData.append('replacement', file);
-        formData.append('target', targetFile);
+    // Dynamically build the Color Groups UI
+    const colorContainer = document.getElementById('colorContainer');
+    colorSections.forEach(section => {
+      const groupDiv = document.createElement('div');
+      groupDiv.className = 'color-group';
+      groupDiv.dataset.section = section.id;
 
-        const xhr = new XMLHttpRequest();
-        const uploadUrl = '/upload';
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'color-group-header';
+      headerDiv.innerHTML = `
+        <h3 class="color-group-title">${section.title}</h3>
+        <p class="color-group-desc">${section.desc}</p>
+      `;
+      groupDiv.appendChild(headerDiv);
 
-        xhr.open('POST', uploadUrl, true);
+      const gridDiv = document.createElement('div');
+      gridDiv.className = 'color-grid';
 
-        xhr.upload.addEventListener('progress', (event) => {
-          if (!event.lengthComputable) return;
-          const percent = Math.round((event.loaded / event.total) * 100);
-          popupProgress.style.width = `${percent}%`;
-          popupMessage.textContent = `Uploading ${targetFile}... ${percent}%`;
-        });
+      section.colors.forEach(([key, label, defaultHex]) => {
+        const card = document.createElement('div');
+        card.className = 'color-card';
+        card.dataset.key = key.toLowerCase();
+        card.dataset.label = label.toLowerCase();
 
-        xhr.onload = () => {
-          let payload = {};
-          try {
-            payload = JSON.parse(xhr.responseText);
-          } catch (error) {
-            payload = { success: false, message: xhr.responseText || 'Unexpected server response.' };
-          }
+        card.innerHTML = `
+          <div class="color-info">
+            <span class="color-name">${label}</span>
+          </div>
+          <div class="color-picker-wrap">
+            <input type="color" data-color="${key}" value="${defaultHex}">
+            <input type="text" class="hex-input" data-hex-for="${key}" value="${defaultHex}" maxlength="7" spellcheck="false">
+          </div>
+        `;
+        gridDiv.appendChild(card);
+      });
 
-          if (xhr.status >= 200 && xhr.status < 300 && payload.success !== false) {
-            statusBox.textContent = `Updated ${targetFile} successfully.`;
-            statusBox.className = 'status success';
-            showPopup('success', 'Upload complete', `${targetFile} was saved in the root directory using the correct filename.`, 100);
-            setTimeout(hidePopup, 3500);
-          } else {
-            const serverMessage = payload.message || `Server error: ${xhr.status}`;
-            statusBox.textContent = `Upload failed for ${targetFile}. ${serverMessage}`;
-            statusBox.className = 'status error';
-            showPopup('error', 'Upload failed', serverMessage, 100);
-          }
-        };
+      groupDiv.appendChild(gridDiv);
+      colorContainer.appendChild(groupDiv);
+    });
 
-        xhr.onerror = () => {
-          statusBox.textContent = `Could not replace ${targetFile}. Please check the server and try again.`;
-          statusBox.className = 'status error';
-          showPopup('error', 'Connection error', 'The upload could not finish. Please make sure the backend is running.', 100);
-        };
+    const colorInputs = [...document.querySelectorAll('[data-color]')];
+    const hexInputs = new Map([...document.querySelectorAll('[data-hex-for]')].map(input => [input.dataset.hexFor, input]));
+    const copyInputs = new Map();
+    let current = {
+      theme: 'classic',
+      width: 1240,
+      colors: getThemeFullColors('classic'),
+      copy: {}
+    };
 
-        xhr.send(formData);
+    // Build copy input fields
+    Object.entries(groups).forEach(([id, fields]) => {
+      fields.forEach(([key, label, type]) => {
+        const wrap = document.createElement('label');
+        wrap.textContent = label;
+        const input = document.createElement(type === 'area' ? 'textarea' : 'input');
+        if (type !== 'area') input.type = 'text';
+        input.dataset.copyKey = key;
+        input.value = DEFAULT_STORE_COPY[key] || '';
+        wrap.append(input);
+        document.getElementById(id).append(wrap);
+        copyInputs.set(key, input);
       });
     });
+
+    // Update Live Preview
+    function preview() {
+      const c = Object.fromEntries(colorInputs.map(i => [i.dataset.color, i.value]));
+
+      // 1. Announcement preview
+      const prevAnnounce = document.getElementById('prevAnnounce');
+      if (prevAnnounce) {
+        prevAnnounce.style.background = c.announcementBg || '#23251f';
+        prevAnnounce.style.color = c.announcementText || '#f7f2e9';
+        prevAnnounce.textContent = copyInputs.get('announcement')?.value || DEFAULT_STORE_COPY.announcement;
+      }
+
+      // 2. Navigation bar preview
+      const prevNav = document.getElementById('prevNav');
+      if (prevNav) {
+        prevNav.style.background = c.headerBg || c.paper;
+        prevNav.style.borderBottomColor = c.headerBorder || c.line;
+      }
+      const prevBrand = document.getElementById('previewBrand');
+      if (prevBrand) {
+        prevBrand.style.color = c.ink;
+        prevBrand.textContent = copyInputs.get('brand')?.value || DEFAULT_STORE_COPY.brand;
+      }
+      const prevNavBtn = document.getElementById('prevNavBtn');
+      if (prevNavBtn) {
+        prevNavBtn.style.background = c.navBtnBg || c.accent;
+        prevNavBtn.style.color = c.navBtnText || '#ffffff';
+        prevNavBtn.textContent = (copyInputs.get('navOrder')?.value || DEFAULT_STORE_COPY.navOrder) + ' ↗';
+      }
+
+      // 3. Hero section preview
+      const prevHero = document.getElementById('prevHero');
+      if (prevHero) {
+        prevHero.style.background = c.heroBg || c.paper;
+      }
+      const prevEyebrow = document.getElementById('prevEyebrow');
+      if (prevEyebrow) {
+        prevEyebrow.style.color = c.heroEyebrow || c.accent;
+        prevEyebrow.textContent = copyInputs.get('heroEyebrow')?.value || DEFAULT_STORE_COPY.heroEyebrow;
+      }
+
+      const previewTitle = document.getElementById('previewTitle');
+      if (previewTitle) {
+        previewTitle.style.color = c.heroTitle || c.ink;
+        const hTitle = copyInputs.get('heroTitle')?.value || DEFAULT_STORE_COPY.heroTitle;
+        previewTitle.innerHTML = hTitle.replace(/(magic|celebrations|togetherness)/i, `<em style="color:${c.heroTitleAccent || c.accent}">$1</em>`);
+      }
+
+      const previewDesc = document.getElementById('previewDescription');
+      if (previewDesc) {
+        previewDesc.style.color = c.heroText || c.muted;
+        previewDesc.textContent = copyInputs.get('heroDescription')?.value || DEFAULT_STORE_COPY.heroDescription;
+      }
+
+      const prevBtnPrimary = document.getElementById('prevBtnPrimary');
+      if (prevBtnPrimary) {
+        prevBtnPrimary.style.background = c.heroBtnPrimaryBg || c.accent;
+        prevBtnPrimary.style.color = c.heroBtnPrimaryText || '#ffffff';
+        prevBtnPrimary.textContent = (copyInputs.get('heroPrimary')?.value || DEFAULT_STORE_COPY.heroPrimary) + ' ↗';
+      }
+
+      const prevBtnSec = document.getElementById('prevBtnSec');
+      if (prevBtnSec) {
+        prevBtnSec.style.borderColor = c.heroBtnSecondaryBorder || c.ink;
+        prevBtnSec.style.color = c.heroBtnSecondaryText || c.ink;
+        prevBtnSec.textContent = copyInputs.get('heroSecondary')?.value || DEFAULT_STORE_COPY.heroSecondary;
+      }
+
+      // 4. Catalogue card preview
+      const prevCardBox = document.getElementById('prevCardBox');
+      if (prevCardBox) {
+        prevCardBox.style.background = c.catalogCardBg || '#ffffff';
+        prevCardBox.style.borderColor = c.catalogCardBorder || c.line;
+      }
+      const prevCardIndex = document.getElementById('prevCardIndex');
+      if (prevCardIndex) {
+        prevCardIndex.style.color = c.catalogCardIndex || c.accent;
+        prevCardIndex.textContent = copyInputs.get('catalogCard1Index')?.value || DEFAULT_STORE_COPY.catalogCard1Index;
+      }
+
+      const prevCardTitle = document.getElementById('prevCardTitle');
+      if (prevCardTitle) {
+        prevCardTitle.style.color = c.catalogCardTitle || c.ink;
+        prevCardTitle.textContent = copyInputs.get('catalogCard1Title')?.value || DEFAULT_STORE_COPY.catalogCard1Title;
+      }
+
+      const prevCardLink = document.getElementById('prevCardLink');
+      if (prevCardLink) {
+        prevCardLink.style.color = c.catalogCardLink || c.accentDark;
+        prevCardLink.textContent = (copyInputs.get('catalogCard1Link')?.value || DEFAULT_STORE_COPY.catalogCard1Link) + ' →';
+      }
+
+      // 5. Footer preview
+      const prevFooter = document.getElementById('prevFooter');
+      if (prevFooter) {
+        prevFooter.style.background = c.footerBg || c.paper;
+        prevFooter.style.color = c.footerText || c.muted;
+        prevFooter.style.borderTopColor = c.footerBorder || c.line;
+      }
+      const prevFootLink = document.getElementById('prevFootLink');
+      if (prevFootLink) {
+        prevFootLink.style.color = c.footerLink || c.accent;
+        prevFootLink.textContent = copyInputs.get('footerLink')?.value || DEFAULT_STORE_COPY.footerLink;
+      }
+
+      // Page width readout
+      const widthVal = document.getElementById('width').value;
+      document.getElementById('widthOutput').value = `${widthVal} px`;
+      document.getElementById('widthOutput').textContent = `${widthVal} px`;
+    }
+
+    // Populate inputs from saved settings
+    function fill(value) {
+      const themeKey = value.theme || 'classic';
+      const themeColors = getThemeFullColors(themeKey);
+
+      current = {
+        theme: themeKey,
+        width: value.width || 1240,
+        colors: { ...themeColors, ...(value.colors || {}) },
+        copy: value.copy || {}
+      };
+
+      document.getElementById('width').value = current.width;
+
+      colorInputs.forEach(i => {
+        const val = current.colors[i.dataset.color] || themeColors[i.dataset.color] || '#bd5137';
+        i.value = val;
+        const hexBox = hexInputs.get(i.dataset.color);
+        if (hexBox) hexBox.value = val.toUpperCase();
+      });
+
+      copyInputs.forEach((input, key) => {
+        const saved = current.copy[key];
+        input.value = (typeof saved === 'string' && saved.trim()) ? saved : (originalCopy[key] || DEFAULT_STORE_COPY[key] || '');
+      });
+
+      document.querySelectorAll('[data-theme]').forEach(b => {
+        b.setAttribute('aria-pressed', String(b.dataset.theme === current.theme));
+      });
+
+      preview();
+    }
+
+    // Collect all data to save
+    function collect() {
+      return {
+        theme: current.theme,
+        width: Number(document.getElementById('width').value),
+        colors: Object.fromEntries(colorInputs.map(i => [i.dataset.color, i.value])),
+        copy: Object.fromEntries([...copyInputs].map(([key, input]) => [key, input.value.trim()]))
+      };
+    }
+
+    // Theme Preset click handler
+    document.querySelectorAll('[data-theme]').forEach(button => {
+      button.addEventListener('click', () => {
+        current.theme = button.dataset.theme;
+        const newColors = getThemeFullColors(current.theme);
+
+        Object.entries(newColors).forEach(([key, value]) => {
+          const input = colorInputs.find(i => i.dataset.color === key);
+          if (input) {
+            input.value = value;
+            const hexBox = hexInputs.get(key);
+            if (hexBox) hexBox.value = value.toUpperCase();
+          }
+        });
+
+        document.querySelectorAll('[data-theme]').forEach(b => {
+          b.setAttribute('aria-pressed', String(b === button));
+        });
+        preview();
+      });
+    });
+
+    // Synchronize color picker <-> hex input
+    colorInputs.forEach(input => {
+      input.addEventListener('input', () => {
+        const hexBox = hexInputs.get(input.dataset.color);
+        if (hexBox) hexBox.value = input.value.toUpperCase();
+        preview();
+      });
+    });
+
+    hexInputs.forEach((hexBox, key) => {
+      hexBox.addEventListener('input', () => {
+        let val = hexBox.value.trim();
+        if (!val.startsWith('#') && val.length > 0) val = '#' + val;
+        if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+          const colorPicker = colorInputs.find(i => i.dataset.color === key);
+          if (colorPicker) {
+            colorPicker.value = val;
+            preview();
+          }
+        }
+      });
+      hexBox.addEventListener('blur', () => {
+        const colorPicker = colorInputs.find(i => i.dataset.color === key);
+        if (colorPicker) hexBox.value = colorPicker.value.toUpperCase();
+      });
+    });
+
+    copyInputs.forEach(i => i.addEventListener('input', preview));
+    document.getElementById('width').addEventListener('input', preview);
+
+    // Section Category Filtering
+    document.querySelectorAll('.color-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.color-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        const filter = tab.dataset.filter;
+        document.querySelectorAll('.color-group').forEach(group => {
+          if (filter === 'all' || group.dataset.section === filter) {
+            group.classList.remove('hidden');
+          } else {
+            group.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    // Search filter across color controls
+    document.getElementById('colorSearch').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll('.color-card').forEach(card => {
+        const name = card.dataset.label || '';
+        const key = card.dataset.key || '';
+        const match = !q || name.includes(q) || key.includes(q);
+        card.classList.toggle('hidden', !match);
+      });
+
+      // Show/hide groups based on whether they have visible cards
+      document.querySelectorAll('.color-group').forEach(group => {
+        const hasVisible = group.querySelectorAll('.color-card:not(.hidden)').length > 0;
+        group.classList.toggle('hidden', !hasVisible);
+      });
+    });
+
+    // Save and Publish
+    async function save(value) {
+      const button = document.getElementById('save');
+      button.disabled = true;
+      document.getElementById('saveStatus').textContent = 'Saving…';
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(value)
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || 'Could not save settings');
+
+        current = value;
+        document.getElementById('saveStatus').textContent = 'Saved! All storefront colors are live.';
+        setTimeout(() => {
+          document.getElementById('saveStatus').textContent = '';
+        }, 5000);
+      } catch (error) {
+        document.getElementById('saveStatus').textContent = `Save failed: ${error.message}`;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    document.getElementById('save').addEventListener('click', () => save(collect()));
+    document.getElementById('reset').addEventListener('click', () => {
+      fill({ theme: 'classic', width: 1240, colors: getThemeFullColors('classic'), copy: {} });
+      save(collect());
+    });
+
+    // Initialize Page
+    async function initialize() {
+      try {
+        let pageResponse;
+        try {
+          pageResponse = await fetch('index.html', { cache: 'no-store' });
+        } catch (_) {
+          pageResponse = await fetch('/index.html', { cache: 'no-store' });
+        }
+        if (pageResponse && pageResponse.ok) {
+          const page = await pageResponse.text();
+          const documentCopy = new DOMParser().parseFromString(page, 'text/html');
+          documentCopy.querySelectorAll('[data-copy]').forEach(node => {
+            const val = node.textContent.trim();
+            if (val) originalCopy[node.dataset.copy] = val;
+          });
+        }
+      } catch (error) {
+        console.warn('Could not scrape index.html copy dynamically, using defaults', error);
+      }
+
+      try {
+        const response = await fetch(endpoint);
+        if (!response.ok) throw new Error('Settings service unavailable');
+        fill(await response.json());
+        document.getElementById('connection').textContent = 'Connected · edits publish live to storefront';
+      } catch (error) {
+        fill({ theme: 'classic', width: 1240, colors: getThemeFullColors('classic'), copy: {} });
+        document.getElementById('connection').textContent = 'Ready · save to publish changes';
+      }
+    }
+
+    initialize();
   </script>
 </body>
 </html>

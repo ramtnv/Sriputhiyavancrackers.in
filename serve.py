@@ -169,6 +169,17 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         request_path = urlparse(self.path).path
+        if request_path in ('/api/site-settings', '/api/site-settings.php'):
+            settings_path = SITE_ROOT / 'site-settings.json'
+            try:
+                settings = json.loads(settings_path.read_text(encoding='utf-8')) if settings_path.exists() else {}
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps(settings).encode('utf-8'))
+            except (OSError, ValueError):
+                self.send_error(500, 'Unable to read site settings.')
+            return
         if request_path in ('/api/invoice/next-number', '/api/invoice/next-number.php'):
             year = datetime.now().year
             invoice_no = get_next_invoice_number(year)
@@ -213,6 +224,32 @@ class Handler(SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self):
+        if urlparse(self.path).path in ('/api/site-settings', '/api/site-settings.php'):
+            try:
+                length = int(self.headers.get('Content-Length', '0'))
+                if length > 100_000:
+                    raise ValueError('Settings payload is too large.')
+                settings = json.loads(self.rfile.read(length).decode('utf-8'))
+                if not isinstance(settings, dict):
+                    raise ValueError('Settings must be a JSON object.')
+                colors = settings.get('colors', {})
+                if not isinstance(colors, dict) or any(not re.fullmatch(r'#[0-9a-fA-F]{6}', str(v)) for v in colors.values()):
+                    raise ValueError('Colors must use six-digit hex values.')
+                width = int(settings.get('width', 1240))
+                if not 720 <= width <= 1600:
+                    raise ValueError('Page width must be between 720 and 1600 pixels.')
+                settings['width'] = width
+                (SITE_ROOT / 'site-settings.json').write_text(json.dumps(settings, ensure_ascii=False, indent=2), encoding='utf-8')
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'success': True}).encode('utf-8'))
+            except (ValueError, OSError) as exc:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'success': False, 'message': str(exc)}).encode('utf-8'))
+            return
         if self.path in ('/api/invoice/save-pdf', '/api/invoice/save-pdf.php', '/save-invoice'):
             try:
                 content_type = self.headers.get('Content-Type', '')
